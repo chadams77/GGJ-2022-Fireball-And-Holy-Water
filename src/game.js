@@ -1,3 +1,6 @@
+window.GAME_WIDTH = 320;
+window.GAME_HEIGHT = 240;
+
 window.FHW = function (canvasId) {
 
     this.renderLoop = new RenderLoop(this.updateRender.bind(this));
