@@ -1,0 +1,34 @@
+<html>
+    <head>
+        <title>F.H.W. v1.0</title>
+        <script src='src/third_party/three.min.js'></script>
+        <script src='src/render_loop.js'></script>
+        <script src='src/world_render.js'></script>
+        <script src='src/game_render.js'></script>
+        <script src='src/game.js'></script>
+        <style type="text/css">
+            #c3d {
+                width: 100%;
+                height: 100%;
+                z-index: 1;
+            }
+            html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0px;
+                padding: 0px;
+                overflow: hidden;
+                background-color: black;
+            }
+        </style>
+    </head>
+    <body>
+        <canvas id='c3d'></canvas>
+        <script>
+            window.gameInst = new FHW('c3d');
+            gameInst.load(() => {
+                gameInst.start();
+            })
+        </script>
+    </body>
+</html>
