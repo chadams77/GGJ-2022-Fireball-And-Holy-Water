@@ -196,7 +196,7 @@ window.CRT_SHADER = `
     return mask;}        
     #endif
 
-    #if 1
+    #if 0
     // Aperture-grille.
     vec3 Mask(vec2 pos){
     pos.x=fract(pos.x/3.0);
@@ -239,13 +239,13 @@ window.CRT_SHADER = `
     vec4 doCrt(vec2 ipos) {
         vec2 pos = Warp(ipos);
         vec4 retColor = vec4(0., 0., 0., 1.);
-        retColor.rgb=Tri(pos);
+        retColor.rgb=Tri(pos);//*Mask(pos*res);
         #if 0
             // Normalized exposure.
             retColor.rgb=mix(retColor.rgb,Bloom(pos),bloomAmount);    
         #else
             // Additive bloom.
-            retColor.rgb+=Bloom(pos)*bloomAmount;
+            retColor.rgb+=Bloom(pos)*bloomAmount*2.;
         #endif    
         retColor.rgb=ToSrgb(retColor.rgb);
         return retColor;

@@ -6,6 +6,26 @@ window.GameRender = function(canvasId) {
     this.height = window.innerHeight;
     this.canvas.width = this.width;
     this.canvas.height = this.height;
+   
+    try {
+
+        const testCanvas = document.createElement('canvas');
+        if (!(window.WebGLRenderingContext && (testCanvas.getContext('webgl') || testCanvas.getContext('experimental-webgl')))) {
+            throw "WebGL not found";
+        }
+
+    } catch ( e ) {
+
+        this.webGLError = true;
+        const c2d = this.canvas.getContext('2d');
+        c2d.clearRect(0, 0, this.width, this.height);
+        c2d.fillStyle = '#FF1111';
+        c2d.textAlign = 'center';
+        c2d.font = '20px Arial';
+        c2d.fillText('WebGL Not Supported, Try Enabling WebGL Rendering in browser\'s settings.', this.width*0.5, this.height*0.5);
+        return;
+    
+    }
 
     this.renderer = new THREE.WebGLRenderer({canvas: this.canvas});
     this.renderer.setSize( this.width, this.height );
@@ -19,11 +39,14 @@ window.GameRender = function(canvasId) {
     this.uiCtx = this.uiCanvas.getContext('2d');
     this.uiTexture = new THREE.CanvasTexture(this.uiCanvas);//, undefined, undefined, undefined, THREE.NearestFilter, THREE.NearestFilter);
 
+    this.worldRender = new WorldRender(this);
+
     this.combineShader = new THREE.ShaderMaterial({
         uniforms: {
             res: { value: new THREE.Vector2(GAME_WIDTH, GAME_HEIGHT) },
             aRes: { value: new THREE.Vector2(this.width, this.height) },
-            uiTex: { value: this.uiTexture }
+            uiTex: { value: this.uiTexture },
+            gameTex: { value: this.worldRender.texture }
         },
         vertexShader: `
             varying vec2 vUv;
@@ -35,14 +58,16 @@ window.GameRender = function(canvasId) {
             }
         `,
         fragmentShader: `
-            uniform sampler2D uiTex;
+            uniform sampler2D uiTex, gameTex;
 
             uniform vec2 res, aRes;
 
             varying vec2 vUv;
 
             vec4 getColor(vec2 _uv) {
-                return texture(uiTex, _uv, -16.);
+                vec4 game = texture2D(gameTex, _uv);
+                vec4 ui = texture2D(uiTex, _uv);
+                return vec4(game.rgb * (1. - ui.a) + ui.rgb * ui.a, 1.);
             }
 
             ${window.CRT_SHADER}
@@ -73,27 +98,6 @@ window.GameRender = function(canvasId) {
     this.combineMesh = new THREE.Mesh(this.combineGeom, this.combineShader);
     this.combineMesh.position.set(0, 0, -2);
     this.scene.add(this.combineMesh);
-    
-    try {
-
-        const testCanvas = document.createElement('canvas');
-        if (!(window.WebGLRenderingContext && (testCanvas.getContext('webgl') || testCanvas.getContext('experimental-webgl')))) {
-            throw "WebGL not found";
-        }
-
-    } catch ( e ) {
-
-        this.webGLError = true;
-        const c2d = this.canvas.getContext('2d');
-        c2d.clearRect(0, 0, this.width, this.height);
-        c2d.fillStyle = '#FF1111';
-        c2d.textAlign = 'center';
-        c2d.font = '20px Arial';
-        c2d.fillText('WebGL Not Supported, Try Enabling WebGL Rendering in browser\'s settings.', this.width*0.5, this.height*0.5);
-    
-    }
-
-    this.worldRender = new WorldRender(this);
 
 };
 
@@ -111,8 +115,7 @@ GameRender.prototype.render = function(dt, time) {
 
     this.worldRender.render(dt, time);
 
-    this.uiCtx.fillStyle = '#222';
-    this.uiCtx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+    this.uiCtx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
     this.uiCtx.font = 'normal normal normal 11px/normal Courier New';
     this.uiCtx.textAlign = 'left';
     this.uiCtx.fillStyle = '#fff';
