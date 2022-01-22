@@ -67,7 +67,7 @@ window.CRT_SHADER = `
 
     // Testing only, something to help generate a dark signal for bloom test.
     // Set to zero, or remove Test() if using this shader.
-    #if 1
+    #if 0
     vec3 Test(vec3 c){return c*(1.0/64.0)+c*c*c;}
     #else
     vec3 Test(vec3 c){return c;}
@@ -239,13 +239,13 @@ window.CRT_SHADER = `
     vec4 doCrt(vec2 ipos) {
         vec2 pos = Warp(ipos);
         vec4 retColor = vec4(0., 0., 0., 1.);
-        retColor.rgb=Tri(pos)*Mask(pos * res);
+        retColor.rgb=Tri(pos);
         #if 0
             // Normalized exposure.
             retColor.rgb=mix(retColor.rgb,Bloom(pos),bloomAmount);    
         #else
             // Additive bloom.
-            retColor.rgb+=Bloom(pos)*bloomAmount;    
+            retColor.rgb+=Bloom(pos)*bloomAmount;
         #endif    
         retColor.rgb=ToSrgb(retColor.rgb);
         return retColor;

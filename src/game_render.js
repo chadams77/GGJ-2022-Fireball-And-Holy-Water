@@ -17,7 +17,7 @@ window.GameRender = function(canvasId) {
     this.uiCanvas.width = GAME_WIDTH;
     this.uiCanvas.height = GAME_HEIGHT;
     this.uiCtx = this.uiCanvas.getContext('2d');
-    this.uiTexture = new THREE.CanvasTexture(this.uiCanvas, undefined, undefined, undefined, THREE.NearestFilter, THREE.NearestFilter);
+    this.uiTexture = new THREE.CanvasTexture(this.uiCanvas);//, undefined, undefined, undefined, THREE.NearestFilter, THREE.NearestFilter);
 
     this.combineShader = new THREE.ShaderMaterial({
         uniforms: {
@@ -42,7 +42,7 @@ window.GameRender = function(canvasId) {
             varying vec2 vUv;
 
             vec4 getColor(vec2 _uv) {
-                return texture2D(uiTex, _uv);
+                return texture(uiTex, _uv, -16.);
             }
 
             ${window.CRT_SHADER}
@@ -111,7 +111,7 @@ GameRender.prototype.render = function(dt, time) {
 
     this.worldRender.render(dt, time);
 
-    this.uiCtx.fillStyle = '#666';
+    this.uiCtx.fillStyle = '#222';
     this.uiCtx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
     this.uiCtx.font = 'normal normal normal 11px/normal Courier New';
     this.uiCtx.textAlign = 'left';
