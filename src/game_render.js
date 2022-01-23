@@ -66,7 +66,8 @@ window.GameRender = function(canvasId, map) {
             varying vec2 vUv;
 
             vec4 getColor(vec2 _uv) {
-                vec4 game = texture2D(gameTex, _uv);
+                vec3 off = vec3(0.5 / res.x, 0.5 / res.y, 0.);
+                vec4 game = (texture2D(gameTex, _uv) + texture2D(gameTex, _uv + off.xz) + texture2D(gameTex, _uv + off.zy) + texture2D(gameTex, _uv + off.xy)) * 0.25;
                 vec4 ui = texture2D(uiTex, _uv);
                 return vec4(game.rgb * (1. - ui.a) + ui.rgb * ui.a, 1.);
             }

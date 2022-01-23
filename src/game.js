@@ -12,7 +12,6 @@ window.FHW = function (canvasId) {
         this.noLoad = true;
     }
     
-
 }
 
 FHW.prototype.updateRender = function(dt, time) {
@@ -30,7 +29,7 @@ FHW.prototype.load = async function(then) {
     }
 
     let load = [
-        { key: 'grass-1', size: 128, maxDraw: 64*64, scale: 1.3 }
+        //{ key: 'grass-1', size: 128, maxDraw: 64*64, scale: 1.3 }
     ];
 
     for (let i=0; i<load.length; i++) {
@@ -40,9 +39,7 @@ FHW.prototype.load = async function(then) {
     for (let L of loaded) {
         VSPR[L.url] = L;
     }
-
-    this.map.load();
-
+    
     then();
 
 };
