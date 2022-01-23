@@ -32,7 +32,7 @@ window.GameRender = function(canvasId, map) {
     this.renderer.setSize( this.width, this.height );
     
     this.scene = new THREE.Scene();
-    this.camera = new THREE.OrthographicCamera(1 / - 2, 1 / 2, 1 / 2, 1 / - 2, 1, 1000);
+    this.camera = new THREE.OrthographicCamera(1 / - 2, 1 / 2, 1 / 2, 1 / - 2, 1, 10);
 
     this.uiCanvas = document.createElement('canvas');
     this.uiCanvas.width = GAME_WIDTH;

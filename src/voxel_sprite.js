@@ -1,8 +1,9 @@
-window.VoxelSprite = function(url, size, maxDraw) {
+window.VoxelSprite = function(url, size, maxDraw, scale) {
     this.url = url;
     this.size = size;
     this.loaded = false;
     this.maxDraw = maxDraw || 1;
+    this.scale = scale || 1.;
 };
 
 VoxelSprite.prototype.load = async function(scene) {
@@ -24,9 +25,9 @@ VoxelSprite.prototype.initMesh = function(json) {
         const off3 = i * 3;
         //const off2 = i * 2;
         //const off1 = i;
-        this.positions[off3 + 0] = (V[0] - halfSize) / 255.;
-        this.positions[off3 + 1] = (V[1] - halfSize) / 255.;
-        this.positions[off3 + 2] = (V[2] - halfSize) / 255.;
+        this.positions[off3 + 0] = (V[0] - halfSize) / this.size * this.scale;
+        this.positions[off3 + 1] = (V[2] - halfSize) / this.size * this.scale;
+        this.positions[off3 + 2] = -(V[1] - halfSize) / this.size * this.scale;
         this.colors[off3 + 0] = V[3] / 255.;
         this.colors[off3 + 1] = V[4] / 255.;
         this.colors[off3 + 2] = V[5] / 255.;
@@ -35,7 +36,7 @@ VoxelSprite.prototype.initMesh = function(json) {
         this.normals[off3 + 2] = ((V[8] / 255.) - 0.5) * 2.;
     }
 
-    const pontSize = (1. / this.size);
+    const pontSize = (2. / this.size) * this.scale;
 
     this.material = new THREE.RawShaderMaterial({
 
@@ -82,14 +83,33 @@ VoxelSprite.prototype.initMesh = function(json) {
     this.geometry.setAttribute('position', new THREE.BufferAttribute(this.positions, 3));
     this.geometry.setAttribute('color', new THREE.BufferAttribute(this.colors, 3));
     this.geometry.setAttribute('normal', new THREE.BufferAttribute(this.normals, 3));
-    const inst1 = new Float32Array(4 * this.maxDraw);
-    for (let i=0; i<inst1.length; i++) {
-        inst1[i] = 0.;
+    this.inst1 = new Float32Array(4 * this.maxDraw);
+    for (let i=0; i<this.inst1.length; i++) {
+        this.inst1[i] = 0.;
     }
-    inst1[0] = 2.;
-    this.geometry.setAttribute('inst1', new THREE.InstancedBufferAttribute(inst1, 3));
+    this.geometry.setAttribute('inst1', new THREE.InstancedBufferAttribute(this.inst1, 4));
+    this.geometry.instanceCount = 0;
 
     this.mesh = new THREE.Points(this.geometry, this.material);
 
     this.scene.add(this.mesh);
+
+    this.clear();
 };
+
+VoxelSprite.prototype.clear = function () {
+    this.geometry.instanceCount = 0;
+};
+
+VoxelSprite.prototype.addSprite = function (x, y, z) {
+    let idx = this.geometry.instanceCount;
+    if (idx >= this.maxDraw) {
+        return;
+    }
+    this.geometry.instanceCount += 1;
+    const off4 = idx * 4;
+    this.inst1[off4+0] = x + 0.5;
+    this.inst1[off4+1] = y + 0.5;
+    this.inst1[off4+2] = z;
+    this.inst1[off4+3] = 0.;
+}

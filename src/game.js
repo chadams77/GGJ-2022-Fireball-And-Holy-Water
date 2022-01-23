@@ -4,7 +4,7 @@ window.GAME_HEIGHT = 240;
 window.FHW = function (canvasId) {
 
     this.renderLoop = new RenderLoop(this.updateRender.bind(this));
-    this.map = new GameMap(256);
+    this.map = new GameMap(64);
     this.gameRender = new GameRender(canvasId, this.map);
     window.VSPR = {};
 
@@ -30,16 +30,18 @@ FHW.prototype.load = async function(then) {
     }
 
     let load = [
-        { key: 'sphere', size: 128, maxDraw: 1 }
+        { key: 'grass-1', size: 128, maxDraw: 64*64, scale: 1.3 }
     ];
 
     for (let i=0; i<load.length; i++) {
-        load[i] = (new VoxelSprite(load[i].key, load[i].size, load[i].maxDraw)).load(this.gameRender.worldRender.scene);
+        load[i] = (new VoxelSprite(load[i].key, load[i].size, load[i].maxDraw, load[i].scale)).load(this.gameRender.worldRender.scene);
     }
     let loaded = await Promise.all(load);
     for (let L of loaded) {
         VSPR[L.url] = L;
     }
+
+    this.map.load();
 
     then();
 

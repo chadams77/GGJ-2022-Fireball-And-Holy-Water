@@ -132,6 +132,7 @@ exports.GenerateVoxels = async (outFile, args) => {
 
         vec4 _R_SEED = vec4(${FLOAT(args.seed || 1.)});
         ${sdf_shaders}
+        ${args.customFns || ``}
 
         float getDist(vec3 p) {
             float ret = ${FLOAT(size*10.)};
