@@ -4,11 +4,14 @@ window.GAME_HEIGHT = 240;
 window.FHW = function (canvasId) {
 
     this.renderLoop = new RenderLoop(this.updateRender.bind(this));
-    this.gameRender = new GameRender(canvasId);
+    this.map = new GameMap(256);
+    this.gameRender = new GameRender(canvasId, this.map);
+    window.VSPR = {};
 
     if (this.gameRender.webGLError) {
         this.noLoad = true;
     }
+    
 
 }
 
@@ -26,7 +29,19 @@ FHW.prototype.load = async function(then) {
         return;
     }
 
-    setTimeout(then, 10);
+    let load = [
+        { key: 'sphere', size: 128, maxDraw: 1 }
+    ];
+
+    for (let i=0; i<load.length; i++) {
+        load[i] = (new VoxelSprite(load[i].key, load[i].size, load[i].maxDraw)).load(this.gameRender.worldRender.scene);
+    }
+    let loaded = await Promise.all(load);
+    for (let L of loaded) {
+        VSPR[L.url] = L;
+    }
+
+    then();
 
 };
 

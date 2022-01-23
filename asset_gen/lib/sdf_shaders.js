@@ -1,4 +1,4 @@
-window.SDF_SHADERS = `
+exports.SDF_SHADERS = `
     #define PI 3.14159265359
     #define E_CONST 2.71828182845904523536
 
@@ -430,4 +430,4 @@ window.SDF_SHADERS = `
         d11.y = min(d11.y,d11.z);
         return sqrt(d11.xy);
     }
-`
+`;

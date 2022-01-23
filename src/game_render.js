@@ -1,4 +1,4 @@
-window.GameRender = function(canvasId) {
+window.GameRender = function(canvasId, map) {
 
     this.canvasID = canvasId;
     this.canvas = document.getElementById(this.canvasID);
@@ -6,6 +6,7 @@ window.GameRender = function(canvasId) {
     this.height = window.innerHeight;
     this.canvas.width = this.width;
     this.canvas.height = this.height;
+    this.map = map;
    
     try {
 
@@ -39,7 +40,7 @@ window.GameRender = function(canvasId) {
     this.uiCtx = this.uiCanvas.getContext('2d');
     this.uiTexture = new THREE.CanvasTexture(this.uiCanvas);//, undefined, undefined, undefined, THREE.NearestFilter, THREE.NearestFilter);
 
-    this.worldRender = new WorldRender(this);
+    this.worldRender = new WorldRender(this, this.map);
 
     this.combineShader = new THREE.ShaderMaterial({
         uniforms: {
