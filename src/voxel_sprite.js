@@ -55,11 +55,12 @@ VoxelSprite.prototype.initMesh = function(json) {
             varying vec3 vColor;
         
             void main() {
-                vColor = color;
-                vNormal = normal;
+                vNormal = normalize(normal);
+                vec3 lightDir = normalize(vec3(-3., 0., -3.));
+                vColor = color * max(dot(vNormal, lightDir), 0.);
                 vec3 pos2 = position + inst1.xyz;
                 vec4 mvp = modelViewMatrix * vec4(pos2, 1.0);
-                gl_PointSize = ${pontSize} * (300.0 / -mvp.z);
+                gl_PointSize = ${pontSize} * (${GAME_WIDTH}. / -mvp.z);
                 gl_Position = projectionMatrix * mvp;
             }
         `,
@@ -74,7 +75,7 @@ VoxelSprite.prototype.initMesh = function(json) {
         `,    
         depthTest:   true,
         depthWrite:  true,
-        transparent: true
+        transparent: false
     });
 
     this.geometry = new THREE.InstancedBufferGeometry();

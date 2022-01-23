@@ -217,7 +217,10 @@ exports.GenerateVoxels = async (outFile, args) => {
         let vB = new THREE.Vector3(V[0], V[1], V[2]);
         let vC = new THREE.Vector3(0., 0., 0.);
         for (let i=0; i<other.length; i++) {
-            for (let j=i+1; j<other.length; j++) {
+            for (let j=0; j<other.length; j++) {
+                if (i==j) {
+                    continue;
+                }
                 vA.set(other[i][0], other[i][1], other[i][2]);
                 vB.set(other[j][0], other[j][1], other[j][2]);
                 cb.subVectors( vC, vB );
@@ -226,6 +229,9 @@ exports.GenerateVoxels = async (outFile, args) => {
                 let len2 = ab.lengthSq();
                 cb.cross( ab );
                 cb.normalize();
+                if (GET(Math.floor(V[0]+cb.x*1.5), Math.floor(V[1]+cb.y*1.5), Math.floor(V[2]+cb.z*1.5))) {
+                    continue;
+                }
                 cb.multiplyScalar(1./(len1*len2));
                 norm.addVectors(norm, cb);
             }
