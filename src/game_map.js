@@ -6,7 +6,7 @@ window.GameMap = function(size) {
     for (let i = 0; i < size; i++) {
         let row = [];
         for (let j = 0; j < size; j++) {
-            row.push((Math.abs(i-32)>8 || Math.abs(j-32)>8) ? 2 : ((Math.abs(i-32)>3 || Math.abs(j-32)>3) ? Math.floor(Math.pow(Math.random()*1.1, 2.)) : 0));
+            row.push((Math.abs(i-32)>8 || Math.abs(j-32)>8) ? ((i+j)%3 ? 2 : 3) : ((Math.abs(i-32)>3 || Math.abs(j-32)>3) ? Math.floor(Math.pow(Math.random()*1.1, 2.)) : 0));
         }
         this.map.push(row);
     }
@@ -48,6 +48,9 @@ GameMap.prototype.load = function(worldRender) {
         for (let y = 0; y < this.size; y++) {
             let type = this.map[x][y] || 0;
             switch (type) {
+            case 3: // cave-wall
+                makeBox(2, x, y, 0.0, 3.5);
+                break;
             case 2: // cave
                 makeBox(type, x, y, 1.5, 3.5);
                 makeBox(type, x, y, 0.0, 0.2);
@@ -158,7 +161,7 @@ GameMap.prototype.load = function(worldRender) {
         vec3 getOffset (vec3 p) {
             vec3 ret = vec3(0.);
             float count = 0.;
-            p /= vec3(${this.scale}.);
+            p /= vec3(${GLSL_INSERT.FLOAT(this.scale)});
             if (vTypes1.x > 0.01) {
                 count += vTypes1.x; ret += grassOffset(p) * vec3(vTypes1.x);
             }
@@ -169,7 +172,7 @@ GameMap.prototype.load = function(worldRender) {
                 count += vTypes1.z; ret += caveOffset(p) * vec3(vTypes1.z);
             }
             if (count >= 0.01) {
-                return ret * vec3((1. / count) * ${this.scale}.);
+                return ret * vec3((1. / count) * ${GLSL_INSERT.FLOAT(this.scale)});
             }
             else {
                 return vec3(0.);
@@ -179,7 +182,7 @@ GameMap.prototype.load = function(worldRender) {
         vec3 getColor (vec3 p) {
             vec3 ret = vec3(0.);
             float count = 0.;
-            p /= ${this.scale}.;
+            p /= ${GLSL_INSERT.FLOAT(this.scale)};
             if (vTypes1.x > 0.01) {
                 count += vTypes1.x; ret += grassColor(p) * vec3(vTypes1.x);
             }
@@ -257,10 +260,11 @@ GameMap.prototype.load = function(worldRender) {
                 if (dot(normal, oNormal) < 0.) {
                     normal = -normal;
                 }
-                vec3 lightPos = vec3(3., 3., 2.) * vec3(${this.scale}.);
+                vec3 lightPos = vec3(3., 3., 2.) * vec3(${GLSL_INSERT.FLOAT(this.scale)});
                 vec3 lightDir = normalize(position - lightPos);
                 float diffuse = min(1., max(0., dot(normal, lightDir)));
                 gl_FragColor = vec4(clamp(baseClr * diffuse, vec3(0.), vec3(1.)), 1.);
+                ${FOG_SHADER(this.scale*10, new THREE.Vector3(0.5, 0.5, 0.5))}
             }
         `,    
         depthTest:   true,
