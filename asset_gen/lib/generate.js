@@ -196,7 +196,7 @@ exports.GenerateVoxels = async (outFile, args) => {
     }
 
     for (let V of voxels) {
-        let mdist = 3;
+        let mdist = 2;
         let other = [];
         for (let xo=-mdist; xo<=mdist; xo++) {
             for (let yo=-mdist; yo<=mdist; yo++) {
@@ -231,7 +231,7 @@ exports.GenerateVoxels = async (outFile, args) => {
                 cb.cross( ab );
                 cb.normalize();
                 if (GET(Math.floor(V[0]+cb.x*1.5), Math.floor(V[1]+cb.y*1.5), Math.floor(V[2]+cb.z*1.5))) {
-                    continue;
+                    cb.multiplyScalar(-1.);
                 }
                 cb.multiplyScalar(1./(len1*len2));
                 norm.addVectors(norm, cb);

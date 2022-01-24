@@ -5,13 +5,12 @@ window.WorldRender = function(parent, map) {
 
     this.renderTarget = new THREE.WebGLRenderTarget(GAME_WIDTH*2, GAME_HEIGHT*2, { minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter });
     this.scene = new THREE.Scene();
-    this.camera = new THREE.PerspectiveCamera(50, GAME_WIDTH/GAME_HEIGHT, 0.1, this.map.scale*11.);
+    this.camera = new THREE.PerspectiveCamera(50, GAME_WIDTH/GAME_HEIGHT, 0.1, this.map.scale*1001.);
 
     this.texture = this.renderTarget.texture;
 
-    this.map.load(this);
-
 };
+
 
 WorldRender.prototype.render = function(dt, time) {
 

@@ -54,24 +54,29 @@ VoxelSprite.prototype.initMesh = function(json) {
         
             varying vec3 vNormal;
             varying vec3 vColor;
+            varying vec3 vWorldPos;
         
             void main() {
                 vNormal = normalize(normal);
-                vec3 lightDir = normalize(vec3(-3., 0., -3.));
-                vColor = color * max(dot(vNormal, lightDir), 0.);
+                vNormal.xyz = vec3(-vNormal.x, vNormal.z, -vNormal.y);
                 vec3 pos2 = position + inst1.xyz;
+                vWorldPos = pos2;
+                vColor = color;
                 vec4 mvp = modelViewMatrix * vec4(pos2, 1.0);
-                gl_PointSize = ${pontSize} * (${GAME_WIDTH}. / -mvp.z);
+                gl_PointSize = ${GLSL_INSERT.FLOAT(pontSize)} * (${GLSL_INSERT.FLOAT(GAME_WIDTH*2.)} / -mvp.z);
                 gl_Position = projectionMatrix * mvp;
             }
         `,
         fragmentShader: `
             precision highp float;
         
-            varying vec3 vColor, vNormal;
+            varying vec3 vColor, vNormal, vWorldPos;
         
             void main() {
-                gl_FragColor = vec4(vColor, 1.);
+                vec3 lightPos = vec3(3., -3., 2.) * vec3(${GLSL_INSERT.FLOAT(64)});
+                vec3 lightDir = normalize(vWorldPos - lightPos);
+                gl_FragColor = vec4(vColor * max(dot(vNormal, lightDir), 0.), 1.);
+                ${FOG_SHADER(64*10., new THREE.Vector3(0.5, 0.5, 0.5))}
             }
         `,    
         depthTest:   true,
@@ -91,6 +96,8 @@ VoxelSprite.prototype.initMesh = function(json) {
     this.geometry.instanceCount = 0;
 
     this.mesh = new THREE.Points(this.geometry, this.material);
+    this.mesh.frustumCulled = false;
+    this.mesh.needsUpdate = true;
 
     this.scene.add(this.mesh);
 
@@ -108,8 +115,8 @@ VoxelSprite.prototype.addSprite = function (x, y, z) {
     }
     this.geometry.instanceCount += 1;
     const off4 = idx * 4;
-    this.inst1[off4+0] = x + 0.5;
-    this.inst1[off4+1] = y + 0.5;
+    this.inst1[off4+0] = x;
+    this.inst1[off4+1] = y;
     this.inst1[off4+2] = z;
     this.inst1[off4+3] = 0.;
-}
+};

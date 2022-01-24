@@ -260,7 +260,7 @@ GameMap.prototype.load = function(worldRender) {
                 if (dot(normal, oNormal) < 0.) {
                     normal = -normal;
                 }
-                vec3 lightPos = vec3(3., 3., 2.) * vec3(${GLSL_INSERT.FLOAT(this.scale)});
+                vec3 lightPos = vec3(3., -3., 2.) * vec3(${GLSL_INSERT.FLOAT(this.scale)});
                 vec3 lightDir = normalize(position - lightPos);
                 float diffuse = min(1., max(0., dot(normal, lightDir)));
                 gl_FragColor = vec4(clamp(baseClr * diffuse, vec3(0.), vec3(1.)), 1.);
@@ -278,5 +278,10 @@ GameMap.prototype.load = function(worldRender) {
     this.mesh.updateMatrixWorld(true);
 
     this.worldRender.scene.add(this.mesh);
+
+    VSPR['tree-1'].clear();
+    VSPR['tree-1'].addSprite((2+32) * this.scale, (-2+32)* this.scale, this.scale*0.1 + 128/2);
+    VSPR['tree-1'].addSprite((-2+32) * this.scale, (2+32)* this.scale, this.scale*0.1 + 128/2);
+    VSPR['tree-1'].addSprite((4+32) * this.scale, (4+32)* this.scale, this.scale*0.1 + 128/2);
 
 };

@@ -3,10 +3,11 @@ window.GAME_HEIGHT = 240;
 
 window.FHW = function (canvasId) {
 
+    window.VSPR = {};
+
     this.renderLoop = new RenderLoop(this.updateRender.bind(this));
     this.map = new GameMap(64);
     this.gameRender = new GameRender(canvasId, this.map);
-    window.VSPR = {};
 
     if (this.gameRender.webGLError) {
         this.noLoad = true;
@@ -29,7 +30,8 @@ FHW.prototype.load = async function(then) {
     }
 
     let load = [
-        //{ key: 'grass-1', size: 128, maxDraw: 64*64, scale: 1.3 }
+        { key: 'sphere', size: 48., maxDraw: 32, scale: 64. },
+        { key: 'tree-1', size: 128., maxDraw: 128, scale: 128. }
     ];
 
     for (let i=0; i<load.length; i++) {
@@ -39,6 +41,8 @@ FHW.prototype.load = async function(then) {
     for (let L of loaded) {
         VSPR[L.url] = L;
     }
+
+    this.map.load(this.gameRender.worldRender);
     
     then();
 
