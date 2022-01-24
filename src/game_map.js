@@ -284,4 +284,12 @@ GameMap.prototype.load = function(worldRender) {
     VSPR['tree-1'].addSprite((-2+32) * this.scale, (2+32)* this.scale, this.scale*0.1 + 128/2);
     VSPR['tree-1'].addSprite((4+32) * this.scale, (4+32)* this.scale, this.scale*0.1 + 128/2);
 
+    this.player = new Player(31 * this.scale, 31 * this.scale, 0., this);
+
 };
+
+GameMap.prototype.updateRender = function(dt, time) {
+
+    this.player.update(dt, time);
+
+}

@@ -12,6 +12,13 @@ window.FHW = function (canvasId) {
     if (this.gameRender.webGLError) {
         this.noLoad = true;
     }
+
+    window.KEY_PRESSED = {};
+    document.addEventListener('keyup', (e) => {
+        e = e || window.event;
+        KEY_PRESSED[e.keyCode] = true;
+        console.log(e.keyCode);
+    });
     
 }
 
@@ -20,6 +27,7 @@ FHW.prototype.updateRender = function(dt, time) {
     document.title = `F.H.W. v1.0 - ${Math.round(1/dt)} fps`;
 
     this.gameRender.render(dt, time);
+    window.KEY_PRESSED = {};
 
 };
 

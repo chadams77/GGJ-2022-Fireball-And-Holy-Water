@@ -16,9 +16,11 @@ WorldRender.prototype.render = function(dt, time) {
 
     const inst = this.parent;
 
+    this.map.updateRender(dt, time);
+
     this.camera.up.set(0, 0, 1);
-    this.camera.position.set(32.*this.map.scale, 32.*this.map.scale, 0.75*this.map.scale);
-    this.camera.lookAt(this.camera.position.x + Math.cos(time/5), this.camera.position.y + Math.sin(time/5), 0.75*this.map.scale);
+    this.camera.position.set(this.map.player.x, this.map.player.y, 0.75*this.map.scale);
+    this.camera.lookAt(this.map.player.x + Math.cos(this.map.player.angle), this.map.player.y + Math.sin(this.map.player.angle), 0.75*this.map.scale);
 
     inst.renderer.setRenderTarget(this.renderTarget);
     inst.renderer.setClearColor(new THREE.Color(0.5, 0.5, 0.5), 1.0);
