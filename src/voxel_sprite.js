@@ -6,11 +6,12 @@ window.VoxelSprite = function(url, size, maxDraw, scale) {
     this.scale = scale || 1.;
 };
 
-VoxelSprite.prototype.load = async function(scene) {
+VoxelSprite.prototype.load = async function(scene, lightSystem) {
     let res = await (await fetch(`/images/${this.url}-vox.json`)).json();
     console.log(`Loaded '${this.url}': ${res.length} Voxels.`);
     this.loaded = true;
     this.scene = scene;
+    this.lightSystem = lightSystem;
     this.initMesh(res);
     return this;
 };
@@ -32,13 +33,17 @@ VoxelSprite.prototype.initMesh = function(json) {
         this.colors[off3 + 1] = V[4] / 255.;
         this.colors[off3 + 2] = V[5] / 255.;
         this.normals[off3 + 0] = ((V[6] / 255.) - 0.5) * 2.;
-        this.normals[off3 + 1] = ((V[7] / 255.) - 0.5) * 2.;
-        this.normals[off3 + 2] = ((V[8] / 255.) - 0.5) * 2.;
+        this.normals[off3 + 1] = ((V[8] / 255.) - 0.5) * 2.;
+        this.normals[off3 + 2] = ((V[7] / 255.) - 0.5) * 2.;
     }
 
     const pontSize = (2. / this.size) * this.scale;
 
     this.material = new THREE.RawShaderMaterial({
+
+        uniforms: {
+            ...(this.lightSystem.uniforms)
+        },
 
         vertexShader: `
             precision highp float;
@@ -50,16 +55,27 @@ VoxelSprite.prototype.initMesh = function(json) {
         
             attribute vec3 color;
             attribute vec3 normal;
-            attribute vec3 inst1;
+            attribute vec4 inst1;
         
             varying vec3 vNormal;
             varying vec3 vColor;
             varying vec3 vWorldPos;
         
+            vec2 rotate2D( vec2 p, float a ) {
+                float c = cos(a);
+                float s = sin(a);
+                mat2 m = mat2(c,-s,s,c);
+                return m * p;
+            }
+
             void main() {
                 vNormal = normalize(normal);
-                vNormal.xyz = vec3(-vNormal.x, vNormal.z, -vNormal.y);
-                vec3 pos2 = position + inst1.xyz;
+                vNormal.xyz = vec3(vNormal.x, vNormal.y, vNormal.z);
+                vec2 nxz = rotate2D(vNormal.xy, inst1.w);
+                vNormal.x = nxz.x;
+                vNormal.y = nxz.y;
+                vec2 xz = rotate2D(position.xy, inst1.w);
+                vec3 pos2 = vec3(xz.x, xz.y, position.z) + inst1.xyz;
                 vWorldPos = pos2;
                 vColor = color;
                 vec4 mvp = modelViewMatrix * vec4(pos2, 1.0);
@@ -71,12 +87,11 @@ VoxelSprite.prototype.initMesh = function(json) {
             precision highp float;
         
             varying vec3 vColor, vNormal, vWorldPos;
+
+            ${this.lightSystem.fragShader}
         
             void main() {
-                vec3 lightPos = vec3(3., -3., 2.) * vec3(${GLSL_INSERT.FLOAT(64)});
-                vec3 lightDir = normalize(vWorldPos - lightPos);
-                gl_FragColor = vec4(vColor * max(dot(vNormal, lightDir), 0.), 1.);
-                ${FOG_SHADER(64*10., new THREE.Vector3(0.5, 0.5, 0.5))}
+                gl_FragColor = computeLight(vec4(vColor, 1.), vWorldPos, vNormal);
             }
         `,    
         depthTest:   true,
@@ -108,7 +123,7 @@ VoxelSprite.prototype.clear = function () {
     this.geometry.instanceCount = 0;
 };
 
-VoxelSprite.prototype.addSprite = function (x, y, z) {
+VoxelSprite.prototype.addSprite = function (x, y, z, angle) {
     let idx = this.geometry.instanceCount;
     if (idx >= this.maxDraw) {
         return;
@@ -118,5 +133,5 @@ VoxelSprite.prototype.addSprite = function (x, y, z) {
     this.inst1[off4+0] = x;
     this.inst1[off4+1] = y;
     this.inst1[off4+2] = z;
-    this.inst1[off4+3] = 0.;
+    this.inst1[off4+3] = angle || 0;
 };

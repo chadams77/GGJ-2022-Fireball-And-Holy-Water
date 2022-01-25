@@ -14,10 +14,15 @@ window.FHW = function (canvasId) {
     }
 
     window.KEY_PRESSED = {};
+    window.KEY_DOWN = {};
     document.addEventListener('keyup', (e) => {
         e = e || window.event;
         KEY_PRESSED[e.keyCode] = true;
-        console.log(e.keyCode);
+        KEY_DOWN[e.keyCode] = false;
+    });
+    document.addEventListener('keydown', (e) => {
+        e = e || window.event;
+        KEY_DOWN[e.keyCode] = true;
     });
     
 }
@@ -39,11 +44,11 @@ FHW.prototype.load = async function(then) {
 
     let load = [
         { key: 'sphere', size: 48., maxDraw: 32, scale: 64. },
-        { key: 'tree-1', size: 128., maxDraw: 128, scale: 128. }
+        { key: 'tree-1', size: 128., maxDraw: 256, scale: 128. }
     ];
 
     for (let i=0; i<load.length; i++) {
-        load[i] = (new VoxelSprite(load[i].key, load[i].size, load[i].maxDraw, load[i].scale)).load(this.gameRender.worldRender.scene);
+        load[i] = (new VoxelSprite(load[i].key, load[i].size, load[i].maxDraw, load[i].scale)).load(this.gameRender.worldRender.scene, this.map.lightSystem);
     }
     let loaded = await Promise.all(load);
     for (let L of loaded) {

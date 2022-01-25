@@ -14,13 +14,18 @@ window.WorldRender = function(parent, map) {
 
 WorldRender.prototype.render = function(dt, time) {
 
+    this.map.lightSystem.clearDynamic();
+
     const inst = this.parent;
 
     this.map.updateRender(dt, time);
 
+    let camZ = (0.75+0.025*Math.abs(Math.sin(this.map.player.moveT*Math.PI*2.)))*this.map.scale;
     this.camera.up.set(0, 0, 1);
-    this.camera.position.set(this.map.player.x, this.map.player.y, 0.75*this.map.scale);
-    this.camera.lookAt(this.map.player.x + Math.cos(this.map.player.angle), this.map.player.y + Math.sin(this.map.player.angle), 0.75*this.map.scale);
+    this.camera.position.set(this.map.player.x * this.map.scale, this.map.player.y * this.map.scale, camZ);
+    this.camera.lookAt(this.map.player.x * this.map.scale + Math.cos(this.map.player.angle * Math.PI * 0.5), this.map.player.y * this.map.scale + Math.sin(this.map.player.angle * Math.PI * 0.5), camZ);
+
+    this.map.lightSystem.addDynamic(new THREE.Vector3(0.7, 0.7, 0.3), new THREE.Vector3(this.map.player.x * this.map.scale, this.map.player.y * this.map.scale, camZ), this.map.scale * 2.5);
 
     inst.renderer.setRenderTarget(this.renderTarget);
     inst.renderer.setClearColor(new THREE.Color(0.5, 0.5, 0.5), 1.0);

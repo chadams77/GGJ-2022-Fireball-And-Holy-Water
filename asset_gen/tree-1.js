@@ -16,7 +16,7 @@ const main = async () => {
             pos.z + 1.5 * Math.sin(a1) * Math.sin(a2) * len
         );
         branch.push({
-            pos: pos.clone(), thick, pos2: ep, thick2: thick * 0.5
+            pos: pos.clone(), thick: Math.max(thick, 2), pos2: ep, thick2: Math.max(thick * 0.5, 2)
         });
         if (lev < 2) {
             let cnt = Math.rand()*3+2;
@@ -25,7 +25,7 @@ const main = async () => {
             } 
         }
     };
-    genBranch(0, new THREE.Vector3(0, size/2, 0), size/8, size*2.5*(6+Math.rand()*2)/48);
+    genBranch(0, new THREE.Vector3(0, size/2, 0), size/12, size*2.5*(6+Math.rand()*2)/48);
     console.log(`Branches: ${branch.length}`);
     await vgen.GenerateVoxels('tree-1', {
         size: size,
@@ -43,7 +43,7 @@ const main = async () => {
             ret += snoise(p/${vgen.FLOAT(23.7/256*size)}) * ${vgen.FLOAT(size*0.015)};
         `,
         colorFn: `
-            ret.rgb = mix(vec3(0.32, 0.20, 0.025), vec3(0.025, 0.32, 0.075), pow(snoise(p/${vgen.FLOAT(23.7/256*size)})*0.5+0.5, 3.));
+            ret.rgb = mix(vec3(0.32, 0.20, 0.025), vec3(0.32, 0.20, 0.025)*0.3, pow(snoise(p/${vgen.FLOAT(23.7/256*size)})*0.5+0.5, 3.));
         `
     });
 };

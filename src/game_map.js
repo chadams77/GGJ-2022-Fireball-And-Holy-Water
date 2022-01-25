@@ -6,10 +6,17 @@ window.GameMap = function(size) {
     for (let i = 0; i < size; i++) {
         let row = [];
         for (let j = 0; j < size; j++) {
-            row.push((Math.abs(i-32)>8 || Math.abs(j-32)>8) ? ((i+j)%3 ? 2 : 3) : ((Math.abs(i-32)>3 || Math.abs(j-32)>3) ? Math.floor(Math.pow(Math.random()*1.1, 2.)) : 0));
+            row.push((Math.abs(i-32)>8 || Math.abs(j-32)>8) ? ((i+j)%3 ? 2 : 3) : ((Math.abs(i-32)>3 || Math.abs(j-32)>3) ? (Math.random() > 0.825 ? 4 : Math.floor(Math.pow(Math.random()*1.1, 2.))) : 0));
         }
         this.map.push(row);
     }
+
+    this.canPass = {
+        0: true,
+        2: true
+    };
+
+    this.lightSystem = new LightSystem();
 
 };
 
@@ -20,6 +27,8 @@ GameMap.prototype.load = function(worldRender) {
     const divCount = 7;
 
     let tmpGeom = [];
+
+    VSPR['tree-1'].clear();
 
     const makeBox = (type, x, y, low, high) => {
         high = Math.ceil(high * divCount) / divCount;
@@ -48,6 +57,10 @@ GameMap.prototype.load = function(worldRender) {
         for (let y = 0; y < this.size; y++) {
             let type = this.map[x][y] || 0;
             switch (type) {
+            case 4: // tree
+                makeBox(0, x, y, 0.0, 0.2);
+                VSPR['tree-1'].addSprite(x * this.scale, y * this.scale, this.scale*0.1 + 128/2, Math.random()*Math.PI*2);
+                break;
             case 3: // cave-wall
                 makeBox(2, x, y, 0.0, 3.5);
                 break;
@@ -130,9 +143,9 @@ GameMap.prototype.load = function(worldRender) {
         }
         vec3 grassColor(vec3 p) {
             return mix(
-                vec3(0.05, 0.5, 0.1) * 0.4,
-                vec3(0.05, 0.5, 0.1),
-                NO_Z(p*53.7) * 0.5 + 0.5
+                vec3(0.05, 0.5, 0.1) * 0.2,
+                vec3(0.05, 0.5, 0.1) * 0.5,
+                pow(NO_Z(p*53.7) * 0.5 + 0.5, 1.5)
             );
         }
 
@@ -143,7 +156,7 @@ GameMap.prototype.load = function(worldRender) {
             return mix(
                 vec3(0.4, 0.4, 0.4) * 0.4,
                 vec3(0.1, 0.6, 0.1),
-                pow(max(abs(RNO_X(p*103.7)), abs(RNO_Y(p*103.7))), 2.)
+                pow(max(abs(RNO_X(p*103.7)), abs(RNO_Y(p*103.7))), 4.)
             );
         }
 
@@ -154,7 +167,7 @@ GameMap.prototype.load = function(worldRender) {
             return mix(
                 vec3(0.2, 0.2, 0.2) * 0.4,
                 vec3(0.1, 0.4, 0.1),
-                max(abs(RNO_X(p*103.7)), abs(RNO_Y(p*103.7)))
+                pow(max(abs(RNO_X(p*103.7)), abs(RNO_Y(p*103.7))), 3.)
             );
         }
 
@@ -206,6 +219,10 @@ GameMap.prototype.load = function(worldRender) {
     this.geometry = tmpGeom;
     this.material = new THREE.RawShaderMaterial({
 
+        uniforms: {
+            ...(this.lightSystem.uniforms)
+        },
+
         vertexShader: `
             precision highp float;
         
@@ -239,6 +256,7 @@ GameMap.prototype.load = function(worldRender) {
             varying vec4 vTypes1, vTypes2;
 
             ${tileShader}
+            ${this.lightSystem.fragShader}
         
             void main() {
                 vec3 baseClr = getColor(vWorld);
@@ -260,11 +278,7 @@ GameMap.prototype.load = function(worldRender) {
                 if (dot(normal, oNormal) < 0.) {
                     normal = -normal;
                 }
-                vec3 lightPos = vec3(3., -3., 2.) * vec3(${GLSL_INSERT.FLOAT(this.scale)});
-                vec3 lightDir = normalize(position - lightPos);
-                float diffuse = min(1., max(0., dot(normal, lightDir)));
-                gl_FragColor = vec4(clamp(baseClr * diffuse, vec3(0.), vec3(1.)), 1.);
-                ${FOG_SHADER(this.scale*10, new THREE.Vector3(0.5, 0.5, 0.5))}
+                gl_FragColor = computeLight(vec4(baseClr, 1.), position * vec3(${GLSL_INSERT.FLOAT(this.scale)}), normal);
             }
         `,    
         depthTest:   true,
@@ -274,17 +288,13 @@ GameMap.prototype.load = function(worldRender) {
 
     this.mesh = new THREE.Mesh(this.geometry, this.material);
     this.mesh.scale.set(this.scale, this.scale, this.scale);
+    this.mesh.position.set(0, 0, 0);
     this.mesh.updateMatrix(true);
     this.mesh.updateMatrixWorld(true);
 
     this.worldRender.scene.add(this.mesh);
-
-    VSPR['tree-1'].clear();
-    VSPR['tree-1'].addSprite((2+32) * this.scale, (-2+32)* this.scale, this.scale*0.1 + 128/2);
-    VSPR['tree-1'].addSprite((-2+32) * this.scale, (2+32)* this.scale, this.scale*0.1 + 128/2);
-    VSPR['tree-1'].addSprite((4+32) * this.scale, (4+32)* this.scale, this.scale*0.1 + 128/2);
-
-    this.player = new Player(31 * this.scale, 31 * this.scale, 0., this);
+ 
+    this.player = new Player(31, 31, 0., this);
 
 };
 
@@ -292,4 +302,10 @@ GameMap.prototype.updateRender = function(dt, time) {
 
     this.player.update(dt, time);
 
-}
+};
+
+GameMap.prototype.doesCollide = function(x, y) {
+
+    return !!(this.map && this.map[x] && !this.canPass[this.map[x][y]]);
+
+};

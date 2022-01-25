@@ -7,6 +7,7 @@ window.GameRender = function(canvasId, map) {
     this.canvas.width = this.width;
     this.canvas.height = this.height;
     this.map = map;
+    this.lightSystem = this.map.lightSystem;
    
     try {
 
