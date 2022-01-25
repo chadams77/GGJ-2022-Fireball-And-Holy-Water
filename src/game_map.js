@@ -6,7 +6,7 @@ window.GameMap = function(size) {
     for (let i = 0; i < size; i++) {
         let row = [];
         for (let j = 0; j < size; j++) {
-            row.push((Math.abs(i-32)>8 || Math.abs(j-32)>8) ? ((i+j)%3 ? 2 : 3) : ((Math.abs(i-32)>3 || Math.abs(j-32)>3) ? (Math.random() > 0.825 ? 4 : Math.floor(Math.pow(Math.random()*1.1, 2.))) : 0));
+            row.push((Math.abs(i-32)>8 || Math.abs(j-32)>8) ? ((i+j)%3 ? 2 : 3) : ((Math.abs(i-32)>3 || Math.abs(j-32)>3) ? (Math.random() > 0.75 ? (4 + (Math.random() < 0.5 ? 1 : 0)) : Math.floor(Math.pow(Math.random()*1.1, 2.))) : 0));
         }
         this.map.push(row);
     }
@@ -60,6 +60,9 @@ GameMap.prototype.load = function(worldRender) {
         for (let y = 0; y < this.size; y++) {
             let type = this.map[x][y] || 0;
             switch (type) {
+            case 5: // water
+                makeBox(3, x, y, -0.4, 0.1);
+                break;
             case 4: // tree
                 makeBox(0, x, y, 0.0, 0.2);
                 VSPR[`tree-${1 + Math.floor(Math.random()*4)}`].addSprite(x * this.scale, y * this.scale, this.scale*0.1 + 128/2, Math.random()*Math.PI*2);
@@ -68,15 +71,15 @@ GameMap.prototype.load = function(worldRender) {
                 makeBox(2, x, y, 0.0, 3.5);
                 break;
             case 2: // cave
-                makeBox(type, x, y, 1.5, 3.5);
-                makeBox(type, x, y, 0.0, 0.2);
+                makeBox(2, x, y, 1.5, 3.5);
+                makeBox(2, x, y, 0.0, 0.2);
                 break;
             case 1: // rock
-                makeBox(type, x, y, -0.5, 1.5);
+                makeBox(1, x, y, -0.5, 1.5);
                 break;
             case 0: // grass
             default:
-                makeBox(type, x, y, 0.0, 0.2);
+                makeBox(0, x, y, 0.0, 0.2);
                 break;
             }
         }
@@ -134,6 +137,8 @@ GameMap.prototype.load = function(worldRender) {
         #define RNO_Y(p) pow(NO_Y((p)*1.5)*0.5+0.5, 2.)
         #define RNO_Z(p) pow(NO_Z((p)*1.5)*0.5+0.5, 2.)
 
+        uniform float time;
+
         vec3 noiseOffset(vec3 p) {
             return vec3(NO_X(p), NO_Y(p), NO_Z(p));
         }
@@ -149,6 +154,17 @@ GameMap.prototype.load = function(worldRender) {
                 vec3(0.05, 0.5, 0.1) * 0.2,
                 vec3(0.05, 0.5, 0.1) * 0.5,
                 pow(NO_Z(p*53.7) * 0.5 + 0.5, 1.5)
+            );
+        }
+
+        vec3 waterOffset(vec3 p) {
+            return noiseOffset(p*83.7+vec3(time/3.)) * 0.0015;
+        }
+        vec3 waterColor(vec3 p) {
+            return mix(
+                vec3(0.05, 0.1, 0.6),
+                vec3(0.75, 0.75, 0.75) * 0.75,
+                pow(NO_Z(p*83.7+vec3(time/3.)) * 0.5 + 0.5, 1.5)
             );
         }
 
@@ -187,6 +203,9 @@ GameMap.prototype.load = function(worldRender) {
             if (vTypes1.z > 0.01) {
                 count += vTypes1.z; ret += caveOffset(p) * vec3(vTypes1.z);
             }
+            if (vTypes1.w > 0.01) {
+                count += vTypes1.w; ret += waterOffset(p) * vec3(vTypes1.w);
+            }
             if (count >= 0.01) {
                 return ret * vec3((1. / count) * ${GLSL_INSERT.FLOAT(this.scale)});
             }
@@ -208,6 +227,9 @@ GameMap.prototype.load = function(worldRender) {
             if (vTypes1.z > 0.01) {
                 count += vTypes1.z; ret += caveColor(p) * vec3(vTypes1.z);
             }
+            if (vTypes1.w > 0.01) {
+                count += vTypes1.w; ret += waterColor(p) * vec3(vTypes1.w);
+            }
             if (count >= 0.01) {
                 return ret * vec3(1. / count);
             }
@@ -223,7 +245,8 @@ GameMap.prototype.load = function(worldRender) {
     this.material = new THREE.RawShaderMaterial({
 
         uniforms: {
-            ...(this.lightSystem.uniforms)
+            ...(this.lightSystem.uniforms),
+            time: { value: 0. }
         },
 
         vertexShader: `
@@ -294,6 +317,8 @@ GameMap.prototype.load = function(worldRender) {
     this.mesh.position.set(0, 0, 0);
     this.mesh.updateMatrix(true);
     this.mesh.updateMatrixWorld(true);
+    this.mesh.frustumCulled = false;
+    this.mesh.needsUpdate = true;
 
     this.worldRender.scene.add(this.mesh);
  
@@ -304,6 +329,7 @@ GameMap.prototype.load = function(worldRender) {
 GameMap.prototype.updateRender = function(dt, time) {
 
     this.player.update(dt, time);
+    this.material.uniforms.time.value = time;
 
 };
 
