@@ -1,11 +1,10 @@
 const vgen = require('./lib/generate');
 const THREE = vgen.THREE;
 
-const size = 128;
+const size = 150;
 
-Math.seedrand(3);
-
-const main = async () => {
+const genTree = async (seed, no) => {
+    Math.seedrand(seed||3);
     let branch = [];
     let genBranch = (lev, pos, thick, len) => {
         const a2 = (Math.rand()*0.5+0.5) * Math.pow(lev+1, 3.) * Math.PI * 0.125;
@@ -16,18 +15,18 @@ const main = async () => {
             pos.z + 1.5 * Math.sin(a1) * Math.sin(a2) * len
         );
         branch.push({
-            pos: pos.clone(), thick: Math.max(thick, 2), pos2: ep, thick2: Math.max(thick * 0.5, 2)
+            pos: pos.clone(), thick: Math.max(thick, 2.5), pos2: ep, thick2: Math.max(thick * 0.5, 2.5)
         });
         if (lev < 2) {
-            let cnt = Math.rand()*3+2;
+            let cnt = Math.rand()*3+(lev<1 ? 2 : 1);
             while ((cnt--)>0) {
                 genBranch(lev+1, ep.clone(), thick*0.5, len*(Math.rand()*0.4+0.4));
             } 
         }
     };
-    genBranch(0, new THREE.Vector3(0, size/2, 0), size/12, size*2.5*(6+Math.rand()*2)/48);
+    genBranch(0, new THREE.Vector3(0, size/2, 0), size/16, size*2.5*(6+Math.rand()*2)/48);
     console.log(`Branches: ${branch.length}`);
-    await vgen.GenerateVoxels('tree-1', {
+    await vgen.GenerateVoxels(`tree-${no}`, {
         size: size,
         distFn: `
             vec3 pos1, pos2;
@@ -43,9 +42,16 @@ const main = async () => {
             ret += snoise(p/${vgen.FLOAT(23.7/256*size)}) * ${vgen.FLOAT(size*0.015)};
         `,
         colorFn: `
-            ret.rgb = mix(vec3(0.32, 0.20, 0.025), vec3(0.32, 0.20, 0.025)*0.3, pow(snoise(p/${vgen.FLOAT(23.7/256*size)})*0.5+0.5, 3.));
+            ret.rgb = mix(mix(vec3(0.32, 0.20, 0.025), vec3(0.32, 0.20, 0.025)*0.3, pow(snoise(p/${vgen.FLOAT(23.7/256*size)})*0.5+0.5, 3.)), vec3(0.3, 0.3, 0.3), 0.5);
         `
     });
+};
+
+const main = async () => {
+    await genTree(3, 1);
+    await genTree(4, 2);
+    await genTree(5, 3);
+    await genTree(6, 4);
 };
 
 main();

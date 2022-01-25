@@ -43,8 +43,10 @@ FHW.prototype.load = async function(then) {
     }
 
     let load = [
-        { key: 'sphere', size: 48., maxDraw: 32, scale: 64. },
-        { key: 'tree-1', size: 128., maxDraw: 256, scale: 128. }
+        { key: 'tree-1', size: 150., maxDraw: 128, scale: 128. },
+        { key: 'tree-2', size: 150., maxDraw: 128, scale: 128. },
+        { key: 'tree-3', size: 150., maxDraw: 128, scale: 128. },
+        { key: 'tree-4', size: 150., maxDraw: 128, scale: 128. }
     ];
 
     for (let i=0; i<load.length; i++) {

@@ -29,6 +29,9 @@ GameMap.prototype.load = function(worldRender) {
     let tmpGeom = [];
 
     VSPR['tree-1'].clear();
+    VSPR['tree-2'].clear();
+    VSPR['tree-3'].clear();
+    VSPR['tree-4'].clear();
 
     const makeBox = (type, x, y, low, high) => {
         high = Math.ceil(high * divCount) / divCount;
@@ -59,7 +62,7 @@ GameMap.prototype.load = function(worldRender) {
             switch (type) {
             case 4: // tree
                 makeBox(0, x, y, 0.0, 0.2);
-                VSPR['tree-1'].addSprite(x * this.scale, y * this.scale, this.scale*0.1 + 128/2, Math.random()*Math.PI*2);
+                VSPR[`tree-${1 + Math.floor(Math.random()*4)}`].addSprite(x * this.scale, y * this.scale, this.scale*0.1 + 128/2, Math.random()*Math.PI*2);
                 break;
             case 3: // cave-wall
                 makeBox(2, x, y, 0.0, 3.5);
