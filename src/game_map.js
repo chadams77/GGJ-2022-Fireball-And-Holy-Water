@@ -242,6 +242,38 @@ GameMap.prototype.load = function(worldRender) {
 
     //this.geometry = THREE.BufferGeometryUtils.mergeVertices(tmpGeom, 0.25/divCount);
     this.geometry = tmpGeom;
+
+    let vertShader = (shadow) => `
+        precision highp float;
+          
+        uniform mat4 modelViewMatrix;
+        uniform mat4 projectionMatrix;
+        uniform mat4 modelMatrix;
+
+        attribute vec3 position;
+        attribute vec4 types1;
+        attribute vec4 types2;
+        attribute vec3 normal;
+
+        ${shadow ? this.lightSystem.vertexShader : ``}
+
+        varying vec3 vWorld;
+        varying vec4 vTypes1, vTypes2;
+        varying vec3 vNormal;
+
+        ${tileShader}
+
+        void main() {
+            vTypes1 = types1; vTypes2 = types2;
+            vWorld = position;
+            vec3 offset = getOffset(vWorld);
+            vec4 mvp = modelViewMatrix * vec4(position + offset, 1.0);
+            gl_Position = projectionMatrix * mvp;
+            vNormal = normal;
+            ${shadow ? `setShadowCoord(vWorld);` : ``}
+        }
+    `;
+
     this.material = new THREE.RawShaderMaterial({
 
         uniforms: {
@@ -250,33 +282,11 @@ GameMap.prototype.load = function(worldRender) {
         },
 
         vertexShader: `
-            precision highp float;
-        
-            uniform mat4 modelViewMatrix;
-            uniform mat4 projectionMatrix;
-        
-            attribute vec3 position;
-            attribute vec4 types1;
-            attribute vec4 types2;
-            attribute vec3 normal;
-            
-            varying vec3 vWorld;
-            varying vec4 vTypes1, vTypes2;
-            varying vec3 vNormal;
-
-            ${tileShader}
-       
-            void main() {
-                vTypes1 = types1; vTypes2 = types2;
-                vWorld = position;
-                vec3 offset = getOffset(vWorld);
-                vec4 mvp = modelViewMatrix * vec4(position + offset, 1.0);
-                gl_Position = projectionMatrix * mvp;
-                vNormal = normal;
-            }
+            ${vertShader(true)}
         `,
         fragmentShader: `
             precision highp float;
+            #include <packing>
         
             varying vec3 vWorld, vNormal;
             varying vec4 vTypes1, vTypes2;
@@ -312,6 +322,24 @@ GameMap.prototype.load = function(worldRender) {
         transparent: false
     });
 
+    this.smaterial = new THREE.RawShaderMaterial({
+
+        uniforms: {
+            ...(this.lightSystem.uniforms),
+            time: { value: 0. }
+        },
+
+        vertexShader: `
+            ${vertShader(false)}
+        `,
+        fragmentShader: `
+            ${this.lightSystem.shadowFragShader}
+        `,    
+        depthTest:   true,
+        depthWrite:  true,
+        transparent: false
+    });
+
     this.mesh = new THREE.Mesh(this.geometry, this.material);
     this.mesh.scale.set(this.scale, this.scale, this.scale);
     this.mesh.position.set(0, 0, 0);
@@ -320,7 +348,16 @@ GameMap.prototype.load = function(worldRender) {
     this.mesh.frustumCulled = false;
     this.mesh.needsUpdate = true;
 
+    this.smesh = new THREE.Mesh(this.geometry, this.smaterial);
+    this.smesh.scale.set(this.scale, this.scale, this.scale);
+    this.smesh.position.set(0, 0, 0);
+    this.smesh.updateMatrix(true);
+    this.smesh.updateMatrixWorld(true);
+    this.smesh.frustumCulled = false;
+    this.smesh.needsUpdate = true;
+
     this.worldRender.scene.add(this.mesh);
+    this.lightSystem.shadowScene.add(this.smesh);
  
     this.player = new Player(31, 31, 0., this);
 

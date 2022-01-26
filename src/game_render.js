@@ -1,11 +1,13 @@
 window.GameRender = function(canvasId, map) {
 
+
     this.canvasID = canvasId;
     this.canvas = document.getElementById(this.canvasID);
     this.width = window.innerWidth;
     this.height = window.innerHeight;
     this.canvas.width = this.width;
     this.canvas.height = this.height;
+
     this.map = map;
     this.lightSystem = this.map.lightSystem;
    
@@ -31,7 +33,7 @@ window.GameRender = function(canvasId, map) {
 
     this.renderer = new THREE.WebGLRenderer({canvas: this.canvas});
     this.renderer.setSize( this.width, this.height );
-    
+
     this.scene = new THREE.Scene();
     this.camera = new THREE.OrthographicCamera(1 / - 2, 1 / 2, 1 / 2, 1 / - 2, 1, 10);
 
@@ -42,6 +44,8 @@ window.GameRender = function(canvasId, map) {
     this.uiTexture = new THREE.CanvasTexture(this.uiCanvas);//, undefined, undefined, undefined, THREE.NearestFilter, THREE.NearestFilter);
 
     this.worldRender = new WorldRender(this, this.map);
+
+    this.lightSystem.initShadows(this, this.worldRender);
 
     this.combineShader = new THREE.ShaderMaterial({
         uniforms: {
@@ -59,7 +63,7 @@ window.GameRender = function(canvasId, map) {
                 gl_Position = projectionMatrix * mvPosition;
             }
         `,
-        fragmentShader: `
+        fragmentShader: `          
             uniform sampler2D uiTex, gameTex;
 
             uniform vec2 res, aRes;
@@ -69,6 +73,7 @@ window.GameRender = function(canvasId, map) {
             vec4 getColor(vec2 _uv) {
                 vec3 off = vec3(0.5 / res.x, 0.5 / res.y, 0.);
                 vec4 game = (texture2D(gameTex, _uv) + texture2D(gameTex, _uv + off.xz) + texture2D(gameTex, _uv + off.zy) + texture2D(gameTex, _uv + off.xy)) * 0.25;
+                game = texture2D( gameTex, _uv );
                 vec4 ui = texture2D(uiTex, _uv);
                 return vec4(game.rgb * (1. - ui.a) + ui.rgb * ui.a, 1.);
             }
@@ -127,7 +132,7 @@ GameRender.prototype.render = function(dt, time) {
     this.uiTexture.needsUpdate = true;
 
     this.combineShader.uniforms.aRes.value.set(this.width, this.height);
-
+    
     this.renderer.render(this.scene, this.camera);
 
 };

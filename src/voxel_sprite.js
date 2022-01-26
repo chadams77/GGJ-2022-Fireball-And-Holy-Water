@@ -39,6 +39,49 @@ VoxelSprite.prototype.initMesh = function(json) {
 
     const pontSize = (2. / this.size) * this.scale;
 
+    let vertShader = (shadow) => `
+        precision highp float;
+            
+        uniform mat4 modelViewMatrix;
+        uniform mat4 projectionMatrix;
+        uniform mat4 modelMatrix;
+
+        attribute vec3 position;
+
+        attribute vec3 color;
+        attribute vec3 normal;
+        attribute vec4 inst1;
+
+        varying vec3 vNormal;
+        varying vec3 vColor;
+        varying vec3 vWorldPos;
+
+        ${shadow ? this.lightSystem.vertexShader : ``}
+
+        vec2 rotate2D( vec2 p, float a ) {
+            float c = cos(a);
+            float s = sin(a);
+            mat2 m = mat2(c,-s,s,c);
+            return m * p;
+        }
+
+        void main() {
+            vNormal = normalize(normal);
+            vNormal.xyz = vec3(vNormal.x, vNormal.y, vNormal.z);
+            vec2 nxz = rotate2D(vNormal.xy, inst1.w);
+            vNormal.x = nxz.x;
+            vNormal.y = nxz.y;
+            vec2 xz = rotate2D(position.xy, inst1.w);
+            vec3 pos2 = vec3(xz.x, xz.y, position.z) + inst1.xyz;
+            vWorldPos = pos2;
+            vColor = color;
+            vec4 mvp = modelViewMatrix * vec4(pos2, 1.0);
+            gl_PointSize = ${GLSL_INSERT.FLOAT(pontSize)} * (${GLSL_INSERT.FLOAT(GAME_WIDTH*2.)} / -mvp.z);
+            gl_Position = projectionMatrix * mvp;
+            ${shadow ? `setShadowCoord(vWorldPos);` : ``}
+        }
+    `;
+
     this.material = new THREE.RawShaderMaterial({
 
         uniforms: {
@@ -46,46 +89,12 @@ VoxelSprite.prototype.initMesh = function(json) {
         },
 
         vertexShader: `
-            precision highp float;
-        
-            uniform mat4 modelViewMatrix;
-            uniform mat4 projectionMatrix;
-        
-            attribute vec3 position;
-        
-            attribute vec3 color;
-            attribute vec3 normal;
-            attribute vec4 inst1;
-        
-            varying vec3 vNormal;
-            varying vec3 vColor;
-            varying vec3 vWorldPos;
-        
-            vec2 rotate2D( vec2 p, float a ) {
-                float c = cos(a);
-                float s = sin(a);
-                mat2 m = mat2(c,-s,s,c);
-                return m * p;
-            }
-
-            void main() {
-                vNormal = normalize(normal);
-                vNormal.xyz = vec3(vNormal.x, vNormal.y, vNormal.z);
-                vec2 nxz = rotate2D(vNormal.xy, inst1.w);
-                vNormal.x = nxz.x;
-                vNormal.y = nxz.y;
-                vec2 xz = rotate2D(position.xy, inst1.w);
-                vec3 pos2 = vec3(xz.x, xz.y, position.z) + inst1.xyz;
-                vWorldPos = pos2;
-                vColor = color;
-                vec4 mvp = modelViewMatrix * vec4(pos2, 1.0);
-                gl_PointSize = ${GLSL_INSERT.FLOAT(pontSize)} * (${GLSL_INSERT.FLOAT(GAME_WIDTH*2.)} / -mvp.z);
-                gl_Position = projectionMatrix * mvp;
-            }
+            ${vertShader(true)}
         `,
         fragmentShader: `
             precision highp float;
-        
+            #include <packing>
+
             varying vec3 vColor, vNormal, vWorldPos;
 
             ${this.lightSystem.fragShader}
@@ -93,6 +102,23 @@ VoxelSprite.prototype.initMesh = function(json) {
             void main() {
                 gl_FragColor = computeLight(vec4(vColor, 1.), vWorldPos, vNormal);
             }
+        `,    
+        depthTest:   true,
+        depthWrite:  true,
+        transparent: false
+    });
+
+    this.smaterial = new THREE.RawShaderMaterial({
+
+        uniforms: {
+            ...(this.lightSystem.uniforms)
+        },
+
+        vertexShader: `
+            ${vertShader(false)}
+        `,
+        fragmentShader: `
+            ${this.lightSystem.shadowFragShader}
         `,    
         depthTest:   true,
         depthWrite:  true,
@@ -114,7 +140,12 @@ VoxelSprite.prototype.initMesh = function(json) {
     this.mesh.frustumCulled = false;
     this.mesh.needsUpdate = true;
 
+    this.smesh = new THREE.Points(this.geometry, this.smaterial);
+    this.smesh.frustumCulled = false;
+    this.smesh.needsUpdate = true;
+
     this.scene.add(this.mesh);
+    this.lightSystem.shadowScene.add(this.smesh);
 
     this.clear();
 };
