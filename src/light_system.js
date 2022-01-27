@@ -1,3 +1,6 @@
+window.SHADOW_MAP_SIZE = 20*64;
+window.SHADOW_MAP_PIXELS = 4096;
+
 window.LightSystem = function (maxLights) {
     this.maxLights = maxLights || 16;
     let lightColors = [], lightPositions = [];
@@ -36,23 +39,24 @@ window.LightSystem = function (maxLights) {
         }
 
         float readDepth( sampler2D depthSampler, vec2 coord ) {
-            vec3 off = vec3(1., -1., 0.) / vec3(2048.);
+            vec3 off = vec3(1., -1., 0.) / vec3(${GLSL_INSERT.FLOAT(SHADOW_MAP_PIXELS)});
             return texture2D(depthSampler, coord - off.xx).x;
         }
 
         vec4 computeLight(vec4 inColor, vec3 inPos, vec3 inNormal) {
             vec4 outClr = vec4(0., 0., 0., inColor.a);
             vec3 lightDir = normalize(dirLightDir);
-            float diffuse = clamp(dot(inNormal, lightDir), 0., 1.) * 0.8;
+            float diffuse = clamp(dot(inNormal, lightDir), 0., 1.) * 0.9;
             vec3 shadowCoord = getShadowCoord(inPos);
             if (shadowCoord.x > 0. && shadowCoord.y > 0. && shadowCoord.x < 1. && shadowCoord.y < 1.) {
                 float sDepth = readDepth(depthTex, shadowCoord.xy);
                 float tDepth = shadowCoord.z;
-                if ((exp(sDepth) / exp(tDepth)) < 0.999) {
-                    diffuse *= 0.15;
+                float F = exp(sDepth) / exp(tDepth);
+                if (F < 1.) {
+                    diffuse *= mix(0.00, 1.0, clamp((F-0.9)/(1.-0.9), 0., 1.));
                 }
             }
-            diffuse += 0.2;
+            diffuse += 0.1;
             outClr.rgb += inColor.rgb * dirLightColor * vec3(diffuse);
             for (int i=0; i<${this.maxLights}; i++) {
                 if (dynLightColors[i].w > 0.5 && dynLightPos[i].w > 0.) {
@@ -76,9 +80,6 @@ window.LightSystem = function (maxLights) {
         }
     `;
 };
-
-window.SHADOW_MAP_SIZE = 20*64;
-window.SHADOW_MAP_PIXELS = 2048;
 
 LightSystem.prototype.initShadows = function(gameRender, worldRender) {
     this.gameRender = gameRender;
