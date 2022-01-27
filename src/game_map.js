@@ -39,7 +39,13 @@ GameMap.prototype.load = function(worldRender) {
         if (low > high) {
             low = high - 1;
         }
-        let box = new THREE.BoxGeometry(1, 1, high - low, divCount, divCount, (high - low) * divCount);
+        let box = null;
+        if (type === 3) {
+            box = new THREE.BoxGeometry(1+2/divCount, 1+2/divCount, high - low, divCount+2, divCount+2, (high - low) * divCount);
+        }
+        else {
+            box = new THREE.BoxGeometry(1, 1, high - low, divCount, divCount, (high - low) * divCount);
+        }
         let nVerts = box.getAttribute('position').count;
         let typeArray = new Float32Array(nVerts);
         let offset = new THREE.Vector3(x, y, (low+high)*0.5);
@@ -49,7 +55,7 @@ GameMap.prototype.load = function(worldRender) {
             let off3 = i * 3;
             posArray[off3 + 0] += offset.x;
             posArray[off3 + 1] += offset.y;
-            posArray[off3 + 2] += offset.z;
+            posArray[off3 + 2] += offset.z ;
             
         }
         box.setAttribute('type', new THREE.BufferAttribute(typeArray, 1));
@@ -87,7 +93,7 @@ GameMap.prototype.load = function(worldRender) {
 
     tmpGeom = THREE.BufferGeometryUtils.mergeBufferGeometries(tmpGeom);
 
-    const vertKey = (v) => `${Math.floor(v.x * divCount)},${Math.floor(v.y * divCount)},${Math.floor(v.z * divCount)}`;
+    const vertKey = (v) => `${Math.floor(v.x * divCount * 10.)},${Math.floor(v.y * divCount * 10.)},${Math.floor(v.z * divCount * 10.)}`;
 
     const vertMap = {};
     let posAttr = tmpGeom.getAttribute('position');
@@ -98,10 +104,11 @@ GameMap.prototype.load = function(worldRender) {
         let pos = new THREE.Vector3(posAttr.array[offP], posAttr.array[offP+1], posAttr.array[offP+2]);
         let type = typeAttr.array[i];
         let vk = vertKey(pos);
+        if (type === 3) {
+            vk += '-w';
+        }
         (vertMap[vk] = vertMap[vk] || []).push(type);
     }
-
-    tmpGeom.deleteAttribute('type');
 
     let type1Arr = new Float32Array(posAttr.count * 4);
     let type2Arr = new Float32Array(posAttr.count * 4);
@@ -111,6 +118,10 @@ GameMap.prototype.load = function(worldRender) {
         let offT = i * 4;
         let pos = new THREE.Vector3(posAttr.array[offP], posAttr.array[offP+1], posAttr.array[offP+2]);
         let vk = vertKey(pos);
+        let otype = typeAttr.array[i];
+        if (otype === 3) {
+            vk += '-w';
+        }
         let types = vertMap[vk] || [];
         type1Arr[offT + 0] = types.filter((e) => e == 0).length;
         type1Arr[offT + 1] = types.filter((e) => e == 1).length;
@@ -121,6 +132,8 @@ GameMap.prototype.load = function(worldRender) {
         type2Arr[offT + 2] = types.filter((e) => e == 6).length;
         type2Arr[offT + 3] = types.filter((e) => e == 7).length;
     }
+
+    tmpGeom.deleteAttribute('type');
 
     tmpGeom.setAttribute('types1', new THREE.BufferAttribute(type1Arr, 4));
     tmpGeom.setAttribute('types2', new THREE.BufferAttribute(type2Arr, 4));
@@ -133,9 +146,12 @@ GameMap.prototype.load = function(worldRender) {
         #define NO_X(p) (NOISEX(p)*0.75+NOISEX(p*4.)*0.5)
         #define NO_Y(p) (NOISEY(p)*0.75+NOISEY(p*4.)*0.5)
         #define NO_Z(p) (NOISEZ(p)*0.75+NOISEZ(p*4.)*0.5)
-        #define RNO_X(p) pow(NO_X((p)*1.5)*0.5+0.5, 2.)
-        #define RNO_Y(p) pow(NO_Y((p)*1.5)*0.5+0.5, 2.)
-        #define RNO_Z(p) pow(NO_Z((p)*1.5)*0.5+0.5, 2.)
+        #define NO2_X(p) (NOISEX(p)*0.625+NOISEX(p*4.)*0.25+NOISEX(p*16.)*0.125)
+        #define NO2_Y(p) (NOISEY(p)*0.625+NOISEY(p*4.)*0.25+NOISEY(p*16.)*0.125)
+        #define NO2_Z(p) (NOISEZ(p)*0.625+NOISEZ(p*4.)*0.25+NOISEZ(p*16.)*0.125)
+        #define RNO_X(p) pow(NO2_X((p)*1.5)*0.5+0.5, 2.)
+        #define RNO_Y(p) pow(NO2_Y((p)*1.5)*0.5+0.5, 2.)
+        #define RNO_Z(p) pow(NO2_Z((p)*1.5)*0.5+0.5, 2.)
 
         uniform float time;
 
@@ -151,20 +167,20 @@ GameMap.prototype.load = function(worldRender) {
         }
         vec3 grassColor(vec3 p) {
             return mix(
-                vec3(0.05, 0.5, 0.1) * 0.2,
-                vec3(0.05, 0.5, 0.1) * 0.5,
-                pow(NO_Z(p*53.7) * 0.5 + 0.5, 1.5)
+                vec3(0.05, 0.5, 0.1) * 0.1,
+                vec3(0.05, 0.5, 0.1) * 0.6,
+                clamp(pow(RNO_Z(p*53.7) * 0.5 + 0.5, 2.0), 0., 1.)
             );
         }
 
         vec3 waterOffset(vec3 p) {
-            return noiseOffset(p*83.7+vec3(time/3.)) * 0.0015;
+            return noiseOffset(p*83.7+vec3(time/3.)) * vec3(0.25, 0.25, 0.75) * 0.0015;
         }
         vec3 waterColor(vec3 p) {
             return mix(
-                vec3(0.05, 0.1, 0.6),
-                vec3(0.75, 0.75, 0.75) * 0.75,
-                pow(NO_Z(p*83.7+vec3(time/3.)) * 0.5 + 0.5, 1.5)
+                vec3(0.05, 0.1, 0.6) * 0.5,
+                vec3(0.75, 0.75, 0.75),
+                clamp(pow(NO_Z(p*83.7+vec3(time/3.)) * 0.5 + 0.5, 4.0), 0., 1.)
             );
         }
 
@@ -175,7 +191,7 @@ GameMap.prototype.load = function(worldRender) {
             return mix(
                 vec3(0.4, 0.4, 0.4) * 0.4,
                 vec3(0.1, 0.6, 0.1),
-                pow(max(abs(RNO_X(p*103.7)), abs(RNO_Y(p*103.7))), 4.)
+                clamp(pow(max(abs(RNO_X(p*103.7)), abs(RNO_Y(p*103.7))), 4.), 0., 1.)
             );
         }
 
@@ -186,7 +202,7 @@ GameMap.prototype.load = function(worldRender) {
             return mix(
                 vec3(0.2, 0.2, 0.2) * 0.4,
                 vec3(0.1, 0.4, 0.1),
-                pow(max(abs(RNO_X(p*103.7)), abs(RNO_Y(p*103.7))), 3.)
+                clamp(pow(max(abs(RNO_X(p*103.7)), abs(RNO_Y(p*103.7))), 3.), 0., 1.)
             );
         }
 
@@ -257,7 +273,7 @@ GameMap.prototype.load = function(worldRender) {
 
         ${shadow ? this.lightSystem.vertexShader : ``}
 
-        varying vec3 vWorld;
+        varying vec3 vWorld, vWorldOrig;
         varying vec4 vTypes1, vTypes2;
         varying vec3 vNormal;
 
@@ -265,12 +281,17 @@ GameMap.prototype.load = function(worldRender) {
 
         void main() {
             vTypes1 = types1; vTypes2 = types2;
-            vWorld = position;
-            vec3 offset = getOffset(vWorld);
+            vWorldOrig = position;
+            vec3 offset = getOffset(vWorldOrig);
+            vWorld = vWorldOrig + offset;
+            ${!shadow ? `
+            if (vTypes1.w >= 0.01) {
+                offset.z = -64.;
+            }
+            ` : ``}
             vec4 mvp = modelViewMatrix * vec4(position + offset, 1.0);
             gl_Position = projectionMatrix * mvp;
             vNormal = normal;
-            ${shadow ? `setShadowCoord(vWorld);` : ``}
         }
     `;
 
@@ -288,7 +309,7 @@ GameMap.prototype.load = function(worldRender) {
             precision highp float;
             #include <packing>
         
-            varying vec3 vWorld, vNormal;
+            varying vec3 vWorld, vNormal, vWorldOrig;
             varying vec4 vTypes1, vTypes2;
 
             ${tileShader}
@@ -296,12 +317,12 @@ GameMap.prototype.load = function(worldRender) {
         
             void main() {
                 vec3 baseClr = getColor(vWorld);
-                vec3 position = getOffset(vWorld) + vWorld;
+                vec3 position = vWorld;
                 vec3 oNormal = normalize(vNormal);
-                float pScale = 0.01;
-                vec3 posX = getOffset(vWorld + pScale * vec3(1., 0., 0.)) + vWorld + pScale * vec3(1., 0., 0.) * 1.5;
-                vec3 posY = getOffset(vWorld + pScale * vec3(0., 1., 0.)) + vWorld + pScale * vec3(0., 1., 0.) * 1.5;
-                vec3 posZ = getOffset(vWorld + pScale * vec3(0., 0., 1.)) + vWorld + pScale * vec3(0., 0., 1.) * 1.5;
+                float pScale = 0.02;
+                vec3 posX = getOffset(vWorldOrig + pScale * vec3(1., 0., 0.)) + vWorldOrig + pScale * vec3(1., 0., 0.) * 1.5;
+                vec3 posY = getOffset(vWorldOrig + pScale * vec3(0., 1., 0.)) + vWorldOrig + pScale * vec3(0., 1., 0.) * 1.5;
+                vec3 posZ = getOffset(vWorldOrig + pScale * vec3(0., 0., 1.)) + vWorldOrig + pScale * vec3(0., 0., 1.) * 1.5;
                 vec3 n1 = normalize(cross(posX - position, posY - position));
                 vec3 n2 = normalize(cross(posX - posZ, posY - posZ));
                 vec3 normal = -n1 + n2;
@@ -367,6 +388,7 @@ GameMap.prototype.updateRender = function(dt, time) {
 
     this.player.update(dt, time);
     this.material.uniforms.time.value = time;
+    this.smaterial.uniforms.time.value = time;
 
 };
 

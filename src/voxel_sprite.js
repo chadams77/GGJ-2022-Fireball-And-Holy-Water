@@ -78,7 +78,6 @@ VoxelSprite.prototype.initMesh = function(json) {
             vec4 mvp = modelViewMatrix * vec4(pos2, 1.0);
             gl_PointSize = ${GLSL_INSERT.FLOAT(pontSize)} * (${GLSL_INSERT.FLOAT(GAME_WIDTH*2.)} / -mvp.z);
             gl_Position = projectionMatrix * mvp;
-            ${shadow ? `setShadowCoord(vWorldPos);` : ``}
         }
     `;
 

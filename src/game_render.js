@@ -41,7 +41,7 @@ window.GameRender = function(canvasId, map) {
     this.uiCanvas.width = GAME_WIDTH;
     this.uiCanvas.height = GAME_HEIGHT;
     this.uiCtx = this.uiCanvas.getContext('2d');
-    this.uiTexture = new THREE.CanvasTexture(this.uiCanvas);//, undefined, undefined, undefined, THREE.NearestFilter, THREE.NearestFilter);
+    this.uiTexture = new THREE.CanvasTexture(this.uiCanvas, undefined, undefined, undefined, THREE.NearestFilter, THREE.NearestFilter);
 
     this.worldRender = new WorldRender(this, this.map);
 
@@ -124,10 +124,10 @@ GameRender.prototype.render = function(dt, time) {
     this.worldRender.render(dt, time);
 
     this.uiCtx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
-    this.uiCtx.font = 'normal normal normal 11px/normal Courier New';
+    this.uiCtx.font = 'normal normal normal 14px/normal Courier New';
     this.uiCtx.textAlign = 'left';
     this.uiCtx.fillStyle = '#fff';
-    this.uiCtx.fillText(`${Math.round(1/dt)} fps`, 8, 14);
+    this.uiCtx.fillText(`${Math.round(1/dt)} fps`, 16/1.5, 28/1.5);
 
     this.uiTexture.needsUpdate = true;
 
