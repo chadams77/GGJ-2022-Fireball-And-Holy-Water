@@ -7,7 +7,7 @@ window.VoxelSprite = function(url, size, maxDraw, scale) {
 };
 
 VoxelSprite.prototype.load = async function(scene, lightSystem) {
-    let res = await (await fetch(`/images/${this.url}-vox.json`)).json();
+    let res = await (await fetch(`images/${this.url}-vox.json`)).json();
     console.log(`Loaded '${this.url}': ${res.length} Voxels.`);
     this.loaded = true;
     this.scene = scene;
