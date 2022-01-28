@@ -33,6 +33,8 @@ GameMap.prototype.load = function(worldRender) {
     VSPR['tree-3'].clear();
     VSPR['tree-4'].clear();
 
+    let boxGeomLUT = {};
+
     const makeBox = (type, x, y, low, high) => {
         high = Math.ceil(high * divCount) / divCount;
         low = Math.floor(low * divCount) / divCount;
@@ -41,10 +43,18 @@ GameMap.prototype.load = function(worldRender) {
         }
         let box = null;
         if (type === 3) {
-            box = new THREE.BoxGeometry(1+2/divCount, 1+2/divCount, high - low, divCount+2, divCount+2, (high - low) * divCount);
+            let key = JSON.stringify([1+2/divCount, 1+2/divCount, high - low, divCount+2, divCount+2, (high - low) * divCount]);
+            if (!boxGeomLUT[key]) {
+                boxGeomLUT[key] = new THREE.BoxGeometry(1+2/divCount, 1+2/divCount, high - low, divCount+2, divCount+2, (high - low) * divCount);
+            }
+            box = boxGeomLUT[key].clone();
         }
         else {
-            box = new THREE.BoxGeometry(1, 1, high - low, divCount, divCount, (high - low) * divCount);
+            let key = JSON.stringify([1, 1, high - low, divCount, divCount, (high - low) * divCount]);
+            if (!boxGeomLUT[key]) {
+                boxGeomLUT[key] = new THREE.BoxGeometry(1, 1, high - low, divCount, divCount, (high - low) * divCount);
+            }
+            box = boxGeomLUT[key].clone();
         }
         let nVerts = box.getAttribute('position').count;
         let typeArray = new Float32Array(nVerts);
