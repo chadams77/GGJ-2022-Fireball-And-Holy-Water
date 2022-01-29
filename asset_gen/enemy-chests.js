@@ -22,6 +22,7 @@ const genChest = async(type) => {
             p.z -= 20.;
             p.x *= 1.5;
             ${type === 'gdemon' ? `p.x /= 1.25; p.z *= 1.25;` : ``}
+            ${type === 'ydemon' ? `p.x /= 1.35; p.z *= 1.35;` : ``}
             ret = ribs(vec3(0., -18., 20.), 20., p);
             ret = min(ret, ribs(vec3(0., -12., 20.), 22., p));
             ret = min(ret, ribs(vec3(0., -6., 20.), 18., p));
@@ -30,6 +31,9 @@ const genChest = async(type) => {
             ret = min(ret, sdTaperedLine(vec3(0., -28., 20.), vec3(0., ${type === 'skull' ? '20.' : '15.'}, 20.), 3., 3., p) - (1. * pow(sin(p.y/1.25)*0.5+0.5, 3.)));
             ${type === 'gdemon' ? `
             ret -= 3. + (snoise(p/3.7671) * 0.5 + 0.5) * 1.;
+            ` : ``}
+            ${type === 'ydemon' ? `
+            ret -= 3. + (snoise(p/2.7671) * 0.5 + 0.5) * 1.5;
             ` : ``}
         `,
         colorFn: `
@@ -45,9 +49,13 @@ const genChest = async(type) => {
             p.z -= 20.;
             p.x *= 1.5;
             ${type === 'gdemon' ? `p.x /= 1.25; p.z *= 1.25;` : ``}
+            ${type === 'ydemon' ? `p.x /= 1.35; p.z *= 1.35;` : ``}
             ret.rgb = vec3(0.8, 0.8, 0.8);
             ${type === 'gdemon' ? `
             ret.rgb = mix(vec3(0.1, 0.4, 0.1), vec3(0.05, 0.2, 0.05), (snoise(p/3.7671) * 0.5 + 0.5));
+            ` : ``}
+            ${type === 'ydemon' ? `
+            ret.rgb = mix(vec3(0.6, 0.6, 0.2), vec3(0.3, 0.3, 0.1), (snoise(p/2.7671) * 0.5 + 0.5));
             ` : ``}
         `
     });
@@ -56,6 +64,7 @@ const genChest = async(type) => {
 const main = async () => {
     await genChest('skull');
     await genChest('gdemon');
+    await genChest('ydemon');
 };
 
 main();

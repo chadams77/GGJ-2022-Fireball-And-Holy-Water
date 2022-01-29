@@ -12,9 +12,18 @@ const genHands = async(type) => {
             vec3 hand1p = vec3(-22., 8., -30.);
             vec3 hand2p = vec3(22., -8., -20.);
             ` : ``}
+            ${type === 'ydemon' ? `
+            vec3 hand1p = vec3(-25., 8., -30.);
+            vec3 hand2p = vec3(25., -8., -20.);
+            ` : ``}
 
             float handsDist ( vec3 p ) {
+                ${type === 'ydemon' ? `
+                float ret = min(length(p - hand1p) - 10., length(p - hand2p) - 10.);
+                `: `
                 float ret = min(length(p - hand1p) - 5., length(p - hand2p) - 5.);
+                `}
+                
                 ${type === 'gdemon' ? `
                 ret -= 0.5 + (snoise(p/3.7671) * 0.5 + 0.5) * 1.;
                 ` : ``}
@@ -29,7 +38,11 @@ const genHands = async(type) => {
         `,
         distFn: `
             p.y = -p.y;
+            ${(type === 'skull' || type === 'gdemon') ? `
             ret = min(handsDist(p), staffDist(p));
+            ` : `
+            ret = handsDist(p);
+            `}
         `,
         colorFn: `
             p.y = -p.y;
@@ -48,6 +61,9 @@ const genHands = async(type) => {
             else {
                 ret.rgb = vec3(0.9, 0.9, 0.9);
             }
+            `:``}
+            ${type === 'ydemon' ? `
+            ret.rgb = vec3(0.6, 0.6, 0.);
             `:``}
         `
     });
@@ -62,9 +78,17 @@ const genHands = async(type) => {
             vec3 hand1p = vec3(-12., 5., -50.);
             vec3 hand2p = vec3(18., -5., -10.);
             ` : ``}
+            ${type === 'ydemon' ? `
+            vec3 hand1p = vec3(-15., 5., -50.);
+            vec3 hand2p = vec3(21., -5., -10.);
+            ` : ``}
 
             float handsDist ( vec3 p ) {
+                ${type === 'ydemon' ? `
+                float ret = min(length(p - hand1p) - 10., length(p - hand2p) - 10.);
+                `: `
                 float ret = min(length(p - hand1p) - 5., length(p - hand2p) - 5.);
+                `}
                 ${type === 'gdemon' ? `
                 ret -= 0.5 + (snoise(p/3.7671) * 0.5 + 0.5) * 1.;
                 ` : ``}
@@ -79,7 +103,11 @@ const genHands = async(type) => {
         `,
         distFn: `
             p.y = -p.y;
+            ${(type === 'skull' || type === 'gdemon') ? `
             ret = min(handsDist(p), staffDist(p));
+            ` : `
+            ret = handsDist(p);
+            `}
         `,
         colorFn: `
             p.y = -p.y;
@@ -99,13 +127,17 @@ const genHands = async(type) => {
                 ret.rgb = vec3(0.9, 0.9, 0.9);
             }
             `:``}
-        `
+            ${type === 'ydemon' ? `
+            ret.rgb = vec3(1., 1., 0.5);
+            `:``}
+            `
     });
 }
 
 const main = async () => {
     await genHands('skull');
     await genHands('gdemon');
+    await genHands('ydemon');
 };
 
 main();

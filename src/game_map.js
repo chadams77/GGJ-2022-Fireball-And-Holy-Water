@@ -413,9 +413,13 @@ GameMap.prototype.updateRender = function(dt, time) {
     VSPR['gdemon-hands-attack'].clear();
     VSPR['gdemon-head'].clear();
     VSPR['gdemon-chest'].clear();
-    VSPR[`gdemon-head`].addSprite((32+Math.cos(ang)*0.25*attackT) * this.scale, (32+Math.sin(ang)*0.25*attackT) * this.scale, (0.9-0.15+0.2+float) * this.scale, ang, deathT);
-    VSPR[`gdemon-chest`].addSprite((32+Math.cos(ang)*0.25*attackT) * this.scale, (32+Math.sin(ang)*0.25*attackT) * this.scale, (0.5-0.15+0.2+float) * this.scale, ang, deathT);
-    VSPR[`gdemon-hands${attackT > 0.1 ? '-attack' : ''}`].addSprite((32+Math.cos(ang)*0.25*attackT) * this.scale, (32+Math.sin(ang)*0.25*attackT) * this.scale, (0.65-0.15+0.2+float) * this.scale, ang, deathT);
+    VSPR['ydemon-hands'].clear();
+    VSPR['ydemon-hands-attack'].clear();
+    VSPR['ydemon-head'].clear();
+    VSPR['ydemon-chest'].clear();
+    VSPR[`ydemon-head`].addSprite((32+Math.cos(ang)*0.25*attackT) * this.scale, (32+Math.sin(ang)*0.25*attackT) * this.scale, (0.9-0.15+0.2+float) * this.scale, ang, deathT);
+    VSPR[`ydemon-chest`].addSprite((32+Math.cos(ang)*0.25*attackT) * this.scale, (32+Math.sin(ang)*0.25*attackT) * this.scale, (0.5-0.15+0.2+float) * this.scale, ang, deathT);
+    VSPR[`ydemon-hands${attackT > 0.1 ? '-attack' : ''}`].addSprite((32+Math.cos(ang)*0.25*attackT) * this.scale, (32+Math.sin(ang)*0.25*attackT) * this.scale, (0.65-0.15+0.2+float) * this.scale, ang, deathT);
 
 };
 

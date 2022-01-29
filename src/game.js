@@ -47,14 +47,18 @@ FHW.prototype.load = async function(then) {
         { key: 'tree-2', size: 150., maxDraw: 128, scale: 128. },
         { key: 'tree-3', size: 150., maxDraw: 128, scale: 128. },
         { key: 'tree-4', size: 150., maxDraw: 128, scale: 128. },
-        { key: 'skull-head', size: 48., maxDraw: 32, scale: 20. },
+        { key: 'skull-head', size: 64., maxDraw: 32, scale: 20.*(64./48.) },
         { key: 'skull-chest', size: 64., maxDraw: 32, scale: 32. },
         { key: 'skull-hands', size: 128., maxDraw: 32, scale: 48.*(128/92) },
         { key: 'skull-hands-attack', size: 164., maxDraw: 32, scale: 48.*(164/92) },
-        { key: 'gdemon-head', size: 48., maxDraw: 32, scale: 24. },
+        { key: 'gdemon-head', size: 64., maxDraw: 32, scale: 24.*(64./48.) },
         { key: 'gdemon-chest', size: 64., maxDraw: 32, scale: 34. },
         { key: 'gdemon-hands', size: 128., maxDraw: 32, scale: 48.*(128/92) },
         { key: 'gdemon-hands-attack', size: 164., maxDraw: 32, scale: 48.*(164/92) },
+        { key: 'ydemon-head', size: 64., maxDraw: 32, scale: 24.*(64./48.) },
+        { key: 'ydemon-chest', size: 64., maxDraw: 32, scale: 34. },
+        { key: 'ydemon-hands', size: 128., maxDraw: 32, scale: 48.*(128/92) },
+        { key: 'ydemon-hands-attack', size: 164., maxDraw: 32, scale: 48.*(164/92) },
     ];
 
     for (let i=0; i<load.length; i++) {
