@@ -164,6 +164,7 @@ GameMap.prototype.load = function(worldRender) {
         #define RNO_Z(p) pow(NO2_Z((p)*1.5)*0.5+0.5, 2.)
 
         uniform float time;
+        uniform float hellT;
 
         vec3 noiseOffset(vec3 p) {
             return vec3(NO_X(p), NO_Y(p), NO_Z(p));
@@ -177,8 +178,8 @@ GameMap.prototype.load = function(worldRender) {
         }
         vec3 grassColor(vec3 p) {
             return mix(
-                vec3(0.05, 0.5, 0.1) * 0.1,
-                vec3(0.05, 0.5, 0.1) * 0.6,
+                mix(vec3(0.05, 0.5, 0.1) * 0.1, vec3(0.2, 0.2, 0.1) * 0.1, hellT),
+                mix(vec3(0.05, 0.5, 0.1) * 0.6, vec3(0.6, 0.1, 0.1) * 0.6, hellT),
                 clamp(pow(RNO_Z(p*53.7) * 0.5 + 0.5, 2.0), 0., 1.)
             );
         }
@@ -188,8 +189,8 @@ GameMap.prototype.load = function(worldRender) {
         }
         vec3 waterColor(vec3 p) {
             return mix(
-                vec3(0.05, 0.1, 0.6) * 0.5,
-                vec3(0.75, 0.75, 0.75),
+                mix(vec3(0.05, 0.1, 0.6) * 0.5, vec3(0.6, 0.1, 0.05) * 0.5, hellT),
+                mix(vec3(0.75, 0.75, 0.75), vec3(0.75, 0.75, 0.2), hellT),
                 clamp(pow(NO_Z(p*83.7+vec3(time/3.)) * 0.5 + 0.5, 4.0), 0., 1.)
             );
         }
@@ -200,7 +201,7 @@ GameMap.prototype.load = function(worldRender) {
         vec3 rockColor(vec3 p) {
             return mix(
                 vec3(0.4, 0.4, 0.4) * 0.4,
-                vec3(0.1, 0.6, 0.1),
+                mix(vec3(0.1, 0.6, 0.1), vec3(0.6, 0.1, 0.1), hellT),
                 clamp(pow(max(abs(RNO_X(p*103.7)), abs(RNO_Y(p*103.7))), 4.), 0., 1.)
             );
         }
@@ -211,7 +212,7 @@ GameMap.prototype.load = function(worldRender) {
         vec3 caveColor(vec3 p) {
             return mix(
                 vec3(0.2, 0.2, 0.2) * 0.4,
-                vec3(0.1, 0.4, 0.1),
+                mix(vec3(0.1, 0.4, 0.1), vec3(0.8, 0.4, 0.1), hellT),
                 clamp(pow(max(abs(RNO_X(p*103.7)), abs(RNO_Y(p*103.7))), 3.), 0., 1.)
             );
         }
@@ -309,7 +310,8 @@ GameMap.prototype.load = function(worldRender) {
 
         uniforms: {
             ...(this.lightSystem.uniforms),
-            time: { value: 0. }
+            time: { value: 0. },
+            hellT: { value: 0. }
         },
 
         vertexShader: `
@@ -357,7 +359,8 @@ GameMap.prototype.load = function(worldRender) {
 
         uniforms: {
             ...(this.lightSystem.uniforms),
-            time: { value: 0. }
+            time: { value: 0. },
+            hellT: { value: 0. }
         },
 
         vertexShader: `
@@ -395,10 +398,10 @@ GameMap.prototype.load = function(worldRender) {
     this.toHellT = 0.;
     sounds['sfx/music-normal.mp3'].loop = true;
     sounds['sfx/music-normal.mp3'].play();
-    sounds['sfx/music-normal.mp3'].volume = 1 - this.hellT;
+    sounds['sfx/music-normal.mp3'].volume = (1 - this.hellT) * 0.99 + 0.01;
     sounds['sfx/music-hell.mp3'].loop = true;
     sounds['sfx/music-hell.mp3'].play();
-    sounds['sfx/music-hell.mp3'].volume = this.hellT;
+    sounds['sfx/music-hell.mp3'].volume = this.hellT * 0.99 + 0.01;
 
 };
 
@@ -413,8 +416,11 @@ GameMap.prototype.updateRender = function(dt, time) {
     this.smaterial.uniforms.time.value = time;
 
     this.hellT += (this.toHellT - this.hellT) * dt * 4;
-    sounds['sfx/music-normal.mp3'].volume = 1 - this.hellT;
-    sounds['sfx/music-hell.mp3'].volume = this.hellT;
+    sounds['sfx/music-normal.mp3'].volume = (1 - this.hellT) * 0.99 + 0.01;
+    sounds['sfx/music-hell.mp3'].volume = this.hellT * 0.99 + 0.01;
+    this.material.uniforms.hellT.value = this.hellT;
+    this.smaterial.uniforms.hellT.value = this.hellT;
+    this.lightSystem.setFogColor(new THREE.Vector3(this.hellT * 0.6 + (1 - this.hellT) * 0.5, (1 - this.hellT) * 0.5, (1 - this.hellT) * 0.5));
 
     if (KEY_PRESSED[72]) {
         this.changeTheme(this.hellT > 0.5 ? 0 : 1);

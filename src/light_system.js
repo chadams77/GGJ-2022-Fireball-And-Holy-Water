@@ -132,5 +132,7 @@ LightSystem.prototype.addDynamic = function(color, position, radius) {
 
 LightSystem.prototype.setDirLight = function(color, dir) {
     this.uniforms.dirLightColor.value.set(color.x, color.y, color.z);
-    this.uniforms.dirLightDir.value.set(dir.x, dir.y, dir.z);
+    if (dir) {
+        this.uniforms.dirLightDir.value.set(dir.x, dir.y, dir.z);
+    }
 };

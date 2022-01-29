@@ -31,7 +31,7 @@ WorldRender.prototype.render = function(dt, time) {
     this.map.lightSystem.updateShadows(dt, time, Math.cos(this.map.player.angle * Math.PI * 0.5), Math.sin(this.map.player.angle * Math.PI * 0.5));
 
     inst.renderer.setRenderTarget(this.renderTarget);
-    inst.renderer.setClearColor(new THREE.Color(0.5, 0.5, 0.5), 1.0);
+    inst.renderer.setClearColor(new THREE.Color(this.map.lightSystem.uniforms.fogColor.value.x, this.map.lightSystem.uniforms.fogColor.value.y, this.map.lightSystem.uniforms.fogColor.value.z), 1.0);
     inst.renderer.render(this.scene, this.camera);
     inst.renderer.setRenderTarget(null);
     inst.renderer.setClearColor(new THREE.Color(0.0, 0.0, 0.0), 1.0);
