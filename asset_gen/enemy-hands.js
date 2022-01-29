@@ -4,8 +4,14 @@ const genHands = async(type) => {
     await vgen.GenerateVoxels(`${type}-hands`, {
         size: 128,
         customFns: `
+            ${type === 'skull' ? `
             vec3 hand1p = vec3(-15., 8., -30.);
             vec3 hand2p = vec3(15., -8., -20.);
+            ` : ``}
+            ${type === 'gdemon' ? `
+            vec3 hand1p = vec3(-22., 8., -30.);
+            vec3 hand2p = vec3(22., -8., -20.);
+            ` : ``}
 
             float handsDist ( vec3 p ) {
                 float ret = min(length(p - hand1p) - 5., length(p - hand2p) - 5.);
@@ -46,10 +52,16 @@ const genHands = async(type) => {
         `
     });
     await vgen.GenerateVoxels(`${type}-hands-attack`, {
-        size: 128,
+        size: 164,
         customFns: `
-            vec3 hand1p = vec3(-8., 5., -40.);
-            vec3 hand2p = vec3(8., -5., 0.);
+            ${type === 'skull' ? `
+            vec3 hand1p = vec3(-8., 5., -50.);
+            vec3 hand2p = vec3(12., -5., -10.);
+            ` : ``}
+            ${type === 'gdemon' ? `
+            vec3 hand1p = vec3(-12., 5., -50.);
+            vec3 hand2p = vec3(18., -5., -10.);
+            ` : ``}
 
             float handsDist ( vec3 p ) {
                 float ret = min(length(p - hand1p) - 5., length(p - hand2p) - 5.);
@@ -92,7 +104,7 @@ const genHands = async(type) => {
 }
 
 const main = async () => {
-    //await genHands('skull');
+    await genHands('skull');
     await genHands('gdemon');
 };
 

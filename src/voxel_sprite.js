@@ -50,7 +50,7 @@ VoxelSprite.prototype.initMesh = function(json) {
 
         attribute vec3 color;
         attribute vec3 normal;
-        attribute vec4 inst1;
+        attribute vec4 inst1, inst2;
 
         varying vec3 vNormal;
         varying vec3 vColor;
@@ -65,16 +65,30 @@ VoxelSprite.prototype.initMesh = function(json) {
             return m * p;
         }
 
+        #define _R_SEED vec4(1341.15151)
+
+        float rand(vec2 co) {
+            return fract(sin(dot(co.xy + _R_SEED.xy, vec2(12.9898,78.233))) * 43758.5453);
+        }
+        float rand(vec3 co) {
+            return rand(vec2(co.x, rand(co.yz) * 43758.5453));
+        }
+        float rand(float co) {
+            return rand(vec2(co));
+        }
+
         void main() {
             vNormal = normalize(normal);
             vNormal.xyz = vec3(vNormal.x, vNormal.y, vNormal.z);
             vec2 nxz = rotate2D(vNormal.xy, inst1.w);
             vNormal.x = nxz.x;
             vNormal.y = nxz.y;
-            vec2 xz = rotate2D(position.xy, inst1.w);
-            vec3 pos2 = vec3(xz.x, xz.y, position.z) + inst1.xyz;
+            vec3 iv = normalize(vec3(rand(position.x)*2.-1., rand(position.y)*2.-1., rand(position.z)));
+            vec3 pos0 = position + iv * vec3(1., 1., 1.75) * vec3(inst2.x) * ${GLSL_INSERT.FLOAT(this.size*0.5)} + vec3(pow(inst2.x, 4.)) * vec3(0., 0., -5. * 64.);
+            vec2 xz = rotate2D(pos0.xy, inst1.w);
+            vec3 pos2 = vec3(xz.x, xz.y, pos0.z) + inst1.xyz;
             vWorldPos = pos2;
-            vColor = color;
+            vColor = mix(color, vec3(1., 0., 0.), inst2.x);
             vec4 mvp = modelViewMatrix * vec4(pos2, 1.0);
             gl_PointSize = ${GLSL_INSERT.FLOAT(pontSize)} * (${GLSL_INSERT.FLOAT(GAME_WIDTH*2.)} / -mvp.z);
             gl_Position = projectionMatrix * mvp;
@@ -129,10 +143,12 @@ VoxelSprite.prototype.initMesh = function(json) {
     this.geometry.setAttribute('color', new THREE.BufferAttribute(this.colors, 3));
     this.geometry.setAttribute('normal', new THREE.BufferAttribute(this.normals, 3));
     this.inst1 = new Float32Array(4 * this.maxDraw);
+    this.inst2 = new Float32Array(4 * this.maxDraw);
     for (let i=0; i<this.inst1.length; i++) {
-        this.inst1[i] = 0.;
+        this.inst1[i] = this.inst2[i] = 0.;
     }
     this.geometry.setAttribute('inst1', new THREE.InstancedBufferAttribute(this.inst1, 4));
+    this.geometry.setAttribute('inst2', new THREE.InstancedBufferAttribute(this.inst2, 4));
     this.geometry.instanceCount = 0;
 
     this.mesh = new THREE.Points(this.geometry, this.material);
@@ -153,7 +169,7 @@ VoxelSprite.prototype.clear = function () {
     this.geometry.instanceCount = 0;
 };
 
-VoxelSprite.prototype.addSprite = function (x, y, z, angle) {
+VoxelSprite.prototype.addSprite = function (x, y, z, angle, deathT) {
     let idx = this.geometry.instanceCount;
     if (idx >= this.maxDraw) {
         return;
@@ -163,6 +179,8 @@ VoxelSprite.prototype.addSprite = function (x, y, z, angle) {
     this.inst1[off4+0] = x;
     this.inst1[off4+1] = y;
     this.inst1[off4+2] = z;
-    this.inst1[off4+3] = angle || 0;
+    this.inst1[off4+3] = -(angle || 0) - Math.PI * 0.5;
+    this.inst2[off4+0] = Math.max(0., Math.min(1., deathT||0.));
     this.geometry.getAttribute('inst1').needsUpdate = true;
+    this.geometry.getAttribute('inst2').needsUpdate = true;
 };

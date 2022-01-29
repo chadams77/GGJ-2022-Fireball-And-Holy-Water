@@ -50,11 +50,11 @@ FHW.prototype.load = async function(then) {
         { key: 'skull-head', size: 48., maxDraw: 32, scale: 20. },
         { key: 'skull-chest', size: 64., maxDraw: 32, scale: 32. },
         { key: 'skull-hands', size: 128., maxDraw: 32, scale: 48.*(128/92) },
-        { key: 'skull-hands-attack', size: 128., maxDraw: 32, scale: 48.*(128/92) },
+        { key: 'skull-hands-attack', size: 164., maxDraw: 32, scale: 48.*(164/92) },
         { key: 'gdemon-head', size: 48., maxDraw: 32, scale: 24. },
         { key: 'gdemon-chest', size: 64., maxDraw: 32, scale: 34. },
         { key: 'gdemon-hands', size: 128., maxDraw: 32, scale: 48.*(128/92) },
-        { key: 'gdemon-hands-attack', size: 128., maxDraw: 32, scale: 48.*(128/92) },
+        { key: 'gdemon-hands-attack', size: 164., maxDraw: 32, scale: 48.*(164/92) },
     ];
 
     for (let i=0; i<load.length; i++) {

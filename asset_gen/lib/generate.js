@@ -49,7 +49,11 @@ const ReadFrameBufferData = (width, height) => {
   
     return null;
   
-};  
+};
+
+let SLOW_MODE = false;
+
+exports.slowMode = (flag) => { SLOW_MODE = !!flag; };
 
 const RenderSlice = async (size, shader, sliceNo) => {
   
@@ -135,7 +139,7 @@ exports.GenerateVoxels = async (outFile, args) => {
         ${args.customFns || ``}
 
         float getDist(vec3 p) {
-            float ret = ${FLOAT(size*10.)};
+            float ret = ${FLOAT((size+2)*10.)};
             ${args.distFn || ''}
             return ret;
         }
@@ -155,25 +159,25 @@ exports.GenerateVoxels = async (outFile, args) => {
         ${shader}
 
         void main () {
-            vec3 p = vec3((vUv-vec2(0.5))*vec2(${FLOAT(size)}), sliceNo-${FLOAT(size/2)});
+            vec3 p = vec3((vUv-vec2(0.5))*vec2(${FLOAT(size+2)}), sliceNo-${FLOAT((size+2)/2)});
             gl_FragColor = getColor(p);
         }
     `;
 
     let slices = [];
-    for (let z=0; z<size; z++) {
+    for (let z=0; z<(size+2); z++) {
         slices.push(
-            await RenderSlice(size, colorShader, z)
+            await RenderSlice(size+2, colorShader, z)
         );
-        await sleep(10/60);
+        await sleep(SLOW_MODE ? 10/60 : 1/60);
     }
 
     let GET = (x, y, z) => {
         if (x<0 || y<0 || z<0 || x>=size || y>=size || z>=size) {
             return null;
         }
-        let slice = slices[z];
-        let off = 4 * (y * size + x);
+        let slice = slices[z+1];
+        let off = 4 * ((y+1) * (size+2) + (x+1));
         if (slice[off+3] > 250) {
             return [ slice[off+0], slice[off+1], slice[off+2] ];
         }
@@ -243,7 +247,7 @@ exports.GenerateVoxels = async (outFile, args) => {
         V.push(Math.floor((norm.z + 1.)*0.5*255.99));
     }
 
-    fs.writeFileSync(`${outFile}-vox.json`, JSON.stringify(voxels));
+    fs.writeFileSync(`../images/${outFile}-vox.json`, JSON.stringify(voxels));
 
     console.log(`Voxel Count: ${voxels.length}`);
 };

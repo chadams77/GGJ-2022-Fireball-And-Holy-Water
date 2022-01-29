@@ -401,6 +401,10 @@ GameMap.prototype.updateRender = function(dt, time) {
     this.smaterial.uniforms.time.value = time;
 
     let float = Math.sin(time*Math.PI*0.5) * 0.05;
+    let attackT = Math.max(0., Math.pow(Math.sin(time*Math.PI)*0.5+0.5, 2.) - .9) / 0.1;
+    let ang = Math.PI;//time*Math.PI*0.25;
+    let deathT = Math.max(0., Math.pow(Math.sin(time*Math.PI*0.5+Math.PI*0.5)*0.5+0.5, 2.) - .5) / 0.5;
+    ang += Math.PI*0.5;
     VSPR['skull-head'].clear();
     VSPR['skull-chest'].clear();
     VSPR['skull-hands'].clear();
@@ -409,9 +413,9 @@ GameMap.prototype.updateRender = function(dt, time) {
     VSPR['gdemon-hands-attack'].clear();
     VSPR['gdemon-head'].clear();
     VSPR['gdemon-chest'].clear();
-    VSPR[`gdemon-head`].addSprite(32 * this.scale, 32 * this.scale, (0.9-0.15+0.2+float) * this.scale, time*Math.PI*0.25);
-    VSPR[`gdemon-chest`].addSprite(32 * this.scale, 32 * this.scale, (0.5-0.15+0.2+float) * this.scale, time*Math.PI*0.25);
-    VSPR[`gdemon-hands${Math.pow(Math.sin(time*Math.PI)*0.5+0.5, 2.) > 0.75 ? '-attack' : ''}`].addSprite(32 * this.scale, 32 * this.scale, (0.65-0.15+0.2+float) * this.scale, time*Math.PI*0.25);
+    VSPR[`gdemon-head`].addSprite((32+Math.cos(ang)*0.25*attackT) * this.scale, (32+Math.sin(ang)*0.25*attackT) * this.scale, (0.9-0.15+0.2+float) * this.scale, ang, deathT);
+    VSPR[`gdemon-chest`].addSprite((32+Math.cos(ang)*0.25*attackT) * this.scale, (32+Math.sin(ang)*0.25*attackT) * this.scale, (0.5-0.15+0.2+float) * this.scale, ang, deathT);
+    VSPR[`gdemon-hands${attackT > 0.1 ? '-attack' : ''}`].addSprite((32+Math.cos(ang)*0.25*attackT) * this.scale, (32+Math.sin(ang)*0.25*attackT) * this.scale, (0.65-0.15+0.2+float) * this.scale, ang, deathT);
 
 };
 
