@@ -33,12 +33,16 @@ window.FHW = function (canvasId) {
         }
         this.soundLoadClicked = true;
         sounds.load([
-            "sfx/music-normal.mp3",
-            "sfx/music-hell.mp3",
-            "sfx/get-ammo.wav"
+            "sfx/music-normal.wav",
+            "sfx/music-hell.wav",
+            "sfx/get-ammo.wav",
+            "sfx/walk-1.wav",
+            "sfx/walk-2.wav"
         ]);
         sounds.whenLoaded = () => {
-            SFX['get-ammo'] = new SoundEffect("sfx/get-ammo.wav", 8);
+            SFX['get-ammo'] = new SoundEffect("sfx/get-ammo.wav");
+            SFX['walk-1'] = new SoundEffect("sfx/walk-1.wav");
+            SFX['walk-2'] = new SoundEffect("sfx/walk-2.wav");
             this.soundsLoaded = true;
             document.body.removeChild(document.getElementById('load-button'));
             document.getElementById('c3d').style.display = 'block';

@@ -35,6 +35,10 @@ window.Enemy = function(eset, map, player, x, y, type) {
     this.attacking = false;
     this.doneAttack = false;
 
+    let dx = this.player.x - this.x, dy = this.player.y - this.y;
+    let len = Math.sqrt(dx*dx+dy*dy);
+    SFX['walk-1'].play(1 / len, 0.5);
+
 };
 
 Enemy.prototype.updateRender = function(dt, time) {
@@ -88,6 +92,11 @@ Enemy.prototype.updateRender = function(dt, time) {
                 this.toX = this.x;
                 this.toY = this.y;
             }
+            else {
+                let sdx = this.player.x - this.x, sdy = this.player.y - this.y;
+                let len = Math.sqrt(sdx*sdx+sdy*sdy);
+                SFX['walk-1'].play(1 / len, 0.9);
+            }
         }
     }
 
@@ -97,8 +106,11 @@ Enemy.prototype.updateRender = function(dt, time) {
     let float = Math.sin(time*Math.PI*0.5) * 0.05;
     let attackT = this.attacking ? (Math.max(0., Math.pow(Math.sin((this.turnT/this.turnLength)*2*Math.PI)*0.5+0.5, 2.) - .9) / 0.1) : 0.;
 
-    if (this.attacking && !this.doneAttack && (this.turnT/this.turnLength) > 0.9) {
+    if (this.attacking && !this.doneAttack && (this.turnT/this.turnLength) > 0.1) {
         // Calculate hit/miss & damage to player
+        let sdx = this.player.x - this.x, sdy = this.player.y - this.y;
+        let len = Math.sqrt(sdx*sdx+sdy*sdy);
+        SFX['walk-2'].play(1.5 / len, 0.9);
         this.doneAttack = true;
     }
 

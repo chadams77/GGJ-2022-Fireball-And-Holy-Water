@@ -397,12 +397,12 @@ GameMap.prototype.load = function(worldRender) {
     this.player = new Player(31, 31, 0., this, this.enemySet);
     this.hellT = 0.;
     this.toHellT = 0.;
-    sounds['sfx/music-normal.mp3'].loop = true;
-    sounds['sfx/music-normal.mp3'].play();
-    sounds['sfx/music-normal.mp3'].volume = (1 - this.hellT) * 0.99 + 0.01;
-    sounds['sfx/music-hell.mp3'].loop = true;
-    sounds['sfx/music-hell.mp3'].play();
-    sounds['sfx/music-hell.mp3'].volume = this.hellT * 0.99 + 0.01;
+    sounds['sfx/music-normal.wav'].loop = true;
+    sounds['sfx/music-normal.wav'].play();
+    sounds['sfx/music-normal.wav'].volume = (1 - this.hellT) * 0.99 + 0.01;
+    sounds['sfx/music-hell.wav'].loop = true;
+    sounds['sfx/music-hell.wav'].play();
+    sounds['sfx/music-hell.wav'].volume = this.hellT * 0.99 + 0.01;
 
 };
 
@@ -417,8 +417,8 @@ GameMap.prototype.updateRender = function(dt, time) {
     this.smaterial.uniforms.time.value = time;
 
     this.hellT += (this.toHellT - this.hellT) * dt * 4;
-    sounds['sfx/music-normal.mp3'].volume = (1 - this.hellT) * 0.99 + 0.01;
-    sounds['sfx/music-hell.mp3'].volume = this.hellT * 0.99 + 0.01;
+    sounds['sfx/music-normal.wav'].volume = (1 - this.hellT) * 0.99 + 0.01;
+    sounds['sfx/music-hell.wav'].volume = this.hellT * 0.99 + 0.01;
     this.material.uniforms.hellT.value = this.hellT;
     this.smaterial.uniforms.hellT.value = this.hellT;
     this.lightSystem.setFogColor(new THREE.Vector3(this.hellT * 0.6 + (1 - this.hellT) * 0.5, (1 - this.hellT) * 0.5, (1 - this.hellT) * 0.5));

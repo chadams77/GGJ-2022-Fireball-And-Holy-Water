@@ -25,6 +25,7 @@ Player.prototype.moveForward = function() {
         this.moving = true;
         this.moveT = 0;
         this.sx = this.x; this.sy = this.y; this.sa = this.angle;
+        SFX['walk-1'].play(0.2);
     }
 };
 
@@ -35,6 +36,7 @@ Player.prototype.moveBackward = function() {
         this.moving = true;
         this.moveT = 0;
         this.sx = this.x; this.sy = this.y; this.sa = this.angle;
+        SFX['walk-1'].play(0.2);
     }
 };
 
