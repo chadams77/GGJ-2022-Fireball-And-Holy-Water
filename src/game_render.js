@@ -127,11 +127,11 @@ GameRender.prototype.render = function(dt, time) {
     this.uiCtx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
 
     let totalHp = 5;
-    let haveHP = 3.5;
+    let haveHP = 5;
     let hSize = 20;
 
     for (let i=1; i<=totalHp; i++) {
-        let percent = Math.min(Math.max(haveHP - i, 0.), 1.);
+        let percent = Math.min(Math.max(haveHP - (i-1), 0.), 1.);
         let x = 8 + (i-1) * hSize, y = 8;
         this.uiCtx.drawImage(IMG['heart-empty'], x, y, hSize, hSize);
         this.uiCtx.drawImage(IMG['heart-full'], 0, 0, Math.round(20*percent), 20, x, y, Math.round(hSize*percent), hSize);

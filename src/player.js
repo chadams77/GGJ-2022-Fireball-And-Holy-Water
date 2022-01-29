@@ -1,4 +1,4 @@
-window.Player = function(x,y,angle,map) {
+window.Player = function(x,y,angle,map,eset) {
     this.x = x;
     this.y = y;
     this.angle = angle;
@@ -15,10 +15,11 @@ window.Player = function(x,y,angle,map) {
         [ -1, 0],
         [ 0, -1]
     ];
+    this.eset = eset;
 };
 
 Player.prototype.moveForward = function() {
-    if (!this.moving && !this.map.doesCollide(this.x + this.IAM[this.angle][0], this.y + this.IAM[this.angle][1])) {
+    if (!this.moving && !this.map.doesCollide(this.x + this.IAM[this.angle][0], this.y + this.IAM[this.angle][1]) && !this.eset.doesCollide(this.x + this.IAM[this.angle][0], this.y + this.IAM[this.angle][1])) {
         this.toX += this.IAM[this.angle][0];
         this.toY += this.IAM[this.angle][1];
         this.moving = true;
@@ -28,7 +29,7 @@ Player.prototype.moveForward = function() {
 };
 
 Player.prototype.moveBackward = function() {
-    if (!this.moving && !this.map.doesCollide(this.x - this.IAM[this.angle][0], this.y - this.IAM[this.angle][1])) {
+    if (!this.moving && !this.map.doesCollide(this.x - this.IAM[this.angle][0], this.y - this.IAM[this.angle][1]) && !this.eset.doesCollide(this.x - this.IAM[this.angle][0], this.y - this.IAM[this.angle][1])) {
         this.toX -= this.IAM[this.angle][0];
         this.toY -= this.IAM[this.angle][1];
         this.moving = true;
@@ -70,16 +71,16 @@ Player.prototype.update = function(dt, time) {
         }
     }
     else {
-        if (KEY_DOWN[37]) {
+        if (KEY_DOWN[37] || KEY_DOWN[65]) {
             this.turnLeft();
         }
-        else if (KEY_DOWN[39]) {
+        else if (KEY_DOWN[39] || KEY_DOWN[68]) {
             this.turnRight();
         }
-        else if (KEY_DOWN[38]) {
+        else if (KEY_DOWN[38] || KEY_DOWN[87]) {
             this.moveForward();
         }
-        else if (KEY_DOWN[40]) {
+        else if (KEY_DOWN[40] || KEY_DOWN[83]) {
             this.moveBackward();
         }
     }
