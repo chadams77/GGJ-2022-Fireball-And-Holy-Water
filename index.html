@@ -4,6 +4,7 @@
         <script src='src/third_party/three.min.js'></script>
         <script src='src/third_party/noise_shaders.js'></script>
         <script src='src/third_party/crt_shader.js'></script>
+        <script src='src/third_party/sound.js'></script>
         <script src='src/global_shaders.js'></script>
         <script src='src/light_system.js'></script>
         <script src='src/voxel_sprite.js'></script>
@@ -31,10 +32,21 @@
                 pointer-events: none;
                 user-select: none;
             }
+            #load-button {
+                position: fixed;
+                left: 50%;
+                top: 50%;
+                margin-left: -64px;
+                margin-top: -64px;
+                z-index: 4;
+                cursor: pointer;
+                pointer-events: initial;
+            }
         </style>
     </head>
     <body>
         <canvas id='c3d'></canvas>
+        <img id='load-button' src='images/load.png'/>
         <script>
             window.gameInst = new FHW('c3d');
             gameInst.load(() => {

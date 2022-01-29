@@ -391,14 +391,34 @@ GameMap.prototype.load = function(worldRender) {
     this.lightSystem.shadowScene.add(this.smesh);
  
     this.player = new Player(31, 31, 0., this);
+    this.hellT = 0.;
+    this.toHellT = 0.;
+    sounds['sfx/music-normal.mp3'].loop = true;
+    sounds['sfx/music-normal.mp3'].play();
+    sounds['sfx/music-normal.mp3'].volume = 1 - this.hellT;
+    sounds['sfx/music-hell.mp3'].loop = true;
+    sounds['sfx/music-hell.mp3'].play();
+    sounds['sfx/music-hell.mp3'].volume = this.hellT;
 
 };
+
+GameMap.prototype.changeTheme = function(hellT) {
+    this.toHellT = hellT;
+}
 
 GameMap.prototype.updateRender = function(dt, time) {
 
     this.player.update(dt, time);
     this.material.uniforms.time.value = time;
     this.smaterial.uniforms.time.value = time;
+
+    this.hellT += (this.toHellT - this.hellT) * dt * 4;
+    sounds['sfx/music-normal.mp3'].volume = 1 - this.hellT;
+    sounds['sfx/music-hell.mp3'].volume = this.hellT;
+
+    if (KEY_PRESSED[72]) {
+        this.changeTheme(this.hellT > 0.5 ? 0 : 1);
+    }
 
     let float = Math.sin(time*Math.PI*0.5) * 0.05;
     let attackT = Math.max(0., Math.pow(Math.sin(time*Math.PI)*0.5+0.5, 2.) - .9) / 0.1;
@@ -417,9 +437,9 @@ GameMap.prototype.updateRender = function(dt, time) {
     VSPR['ydemon-hands-attack'].clear();
     VSPR['ydemon-head'].clear();
     VSPR['ydemon-chest'].clear();
-    VSPR[`ydemon-head`].addSprite((32+Math.cos(ang)*0.25*attackT) * this.scale, (32+Math.sin(ang)*0.25*attackT) * this.scale, (0.9-0.15+0.2+float) * this.scale, ang, deathT);
-    VSPR[`ydemon-chest`].addSprite((32+Math.cos(ang)*0.25*attackT) * this.scale, (32+Math.sin(ang)*0.25*attackT) * this.scale, (0.5-0.15+0.2+float) * this.scale, ang, deathT);
-    VSPR[`ydemon-hands${attackT > 0.1 ? '-attack' : ''}`].addSprite((32+Math.cos(ang)*0.25*attackT) * this.scale, (32+Math.sin(ang)*0.25*attackT) * this.scale, (0.65-0.15+0.2+float) * this.scale, ang, deathT);
+    VSPR[`gdemon-head`].addSprite((32+Math.cos(ang)*0.25*attackT) * this.scale, (32+Math.sin(ang)*0.25*attackT) * this.scale, (0.9-0.15+0.2+float) * this.scale, ang, deathT);
+    VSPR[`gdemon-chest`].addSprite((32+Math.cos(ang)*0.25*attackT) * this.scale, (32+Math.sin(ang)*0.25*attackT) * this.scale, (0.5-0.15+0.2+float) * this.scale, ang, deathT);
+    VSPR[`gdemon-hands${attackT > 0.1 ? '-attack' : ''}`].addSprite((32+Math.cos(ang)*0.25*attackT) * this.scale, (32+Math.sin(ang)*0.25*attackT) * this.scale, (0.65-0.15+0.2+float) * this.scale, ang, deathT);
 
 };
 

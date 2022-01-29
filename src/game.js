@@ -24,6 +24,19 @@ window.FHW = function (canvasId) {
         e = e || window.event;
         KEY_DOWN[e.keyCode] = true;
     });
+    document.addEventListener('mousedown', (e) => {
+        if (this.soundsLoaded) {
+            return;
+        }
+        sounds.load([
+            "sfx/music-normal.mp3",
+            "sfx/music-hell.mp3"
+        ]);
+        sounds.whenLoaded = () => {
+            this.soundsLoaded = true;
+            document.body.removeChild(document.getElementById('load-button'));
+        }
+    });
     
 }
 
@@ -37,6 +50,8 @@ FHW.prototype.updateRender = function(dt, time) {
 };
 
 FHW.prototype.load = async function(then) {
+
+    document.getElementById('load-button').style.opacity = 0.;
 
     if (this.noLoad) {
         return;
@@ -69,8 +84,19 @@ FHW.prototype.load = async function(then) {
         VSPR[L.url] = L;
     }
 
+    document.getElementById('load-button').style.opacity = 1.;
+
+    await (new Promise((resolve, reject) => {
+        let id = setInterval(() => {
+            if (this.soundsLoaded) {
+                window.clearInterval(id);
+                resolve();
+            }
+        }, 10);
+    }));
+
     this.map.load(this.gameRender.worldRender);
-    
+
     then();
 
 };

@@ -23,7 +23,7 @@ const genChest = async(type) => {
             p.x *= 1.5;
             ${type === 'gdemon' ? `p.x /= 1.25; p.z *= 1.25;` : ``}
             ${type === 'ydemon' ? `p.x /= 1.35; p.z *= 1.35;` : ``}
-            ret = ribs(vec3(0., -18., 20.), 20., p);
+            ret = ribs(vec3(0., -18., 20.), 17., p);
             ret = min(ret, ribs(vec3(0., -12., 20.), 22., p));
             ret = min(ret, ribs(vec3(0., -6., 20.), 18., p));
             ret = min(ret, ribs(vec3(0., 0., 20.), 14., p));
