@@ -4,6 +4,7 @@ window.GAME_HEIGHT = 240;
 window.FHW = function (canvasId) {
 
     window.VSPR = {};
+    window.SFX = {};
 
     this.renderLoop = new RenderLoop(this.updateRender.bind(this));
     this.map = new GameMap(64);
@@ -24,15 +25,19 @@ window.FHW = function (canvasId) {
         e = e || window.event;
         KEY_DOWN[e.keyCode] = true;
     });
+    this.soundLoadClicked = false;
     document.addEventListener('mousedown', (e) => {
-        if (this.soundsLoaded) {
+        if (this.soundLoadClicked) {
             return;
         }
+        this.soundLoadClicked = true;
         sounds.load([
             "sfx/music-normal.mp3",
-            "sfx/music-hell.mp3"
+            "sfx/music-hell.mp3",
+            "sfx/get-ammo.wav"
         ]);
         sounds.whenLoaded = () => {
+            SFX['get-ammo'] = new SoundEffect("sfx/get-ammo.wav", 8);
             this.soundsLoaded = true;
             document.body.removeChild(document.getElementById('load-button'));
         }

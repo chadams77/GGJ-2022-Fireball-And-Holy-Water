@@ -150,9 +150,9 @@ GameMap.prototype.load = function(worldRender) {
 
     let tileShader = `
         ${GLSL_NOISE}
-        #define NOISEX(v) (fnoise((v*1.25)+vec3(12341.12341))*2.-1.)
-        #define NOISEY(v) (fnoise((v*1.25)+vec3(2341.12341))*2.-1.)
-        #define NOISEZ(v) (fnoise((v*1.25)+vec3(7341.12341))*2.-1.)
+        #define NOISEX(v) (fnoise(mix(v*1.25,v*1.5,hellT)+vec3(12341.12341))*2.-1.)
+        #define NOISEY(v) (fnoise(mix(v*1.25,v*1.5,hellT)+vec3(2341.12341))*2.-1.)
+        #define NOISEZ(v) (fnoise(mix(v*1.25,v*1.5,hellT)+vec3(7341.12341))*2.-1.)
         #define NO_X(p) (NOISEX(p)*0.75+NOISEX(p*4.)*0.5)
         #define NO_Y(p) (NOISEY(p)*0.75+NOISEY(p*4.)*0.5)
         #define NO_Z(p) (NOISEZ(p)*0.75+NOISEZ(p*4.)*0.5)
@@ -424,6 +424,9 @@ GameMap.prototype.updateRender = function(dt, time) {
 
     if (KEY_PRESSED[72]) {
         this.changeTheme(this.hellT > 0.5 ? 0 : 1);
+    }
+    if (KEY_PRESSED[73]) {
+        SFX['get-ammo'].play(Math.random(), 0.5 + Math.random());
     }
 
     let float = Math.sin(time*Math.PI*0.5) * 0.05;
