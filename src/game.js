@@ -5,6 +5,7 @@ window.FHW = function (canvasId) {
 
     window.VSPR = {};
     window.SFX = {};
+    window.IMG = {};
 
     this.renderLoop = new RenderLoop(this.updateRender.bind(this));
     this.map = new GameMap(64);
@@ -40,8 +41,37 @@ window.FHW = function (canvasId) {
             SFX['get-ammo'] = new SoundEffect("sfx/get-ammo.wav", 8);
             this.soundsLoaded = true;
             document.body.removeChild(document.getElementById('load-button'));
+            document.getElementById('c3d').style.display = 'block';
         }
     });
+    document.addEventListener('mousemove', (e) => {
+        e = e || window.event;
+        let p = window.GAME_MOUSE = {
+            x: e.pageX,
+            y: e.pageY
+        };
+        let aspectA = window.innerWidth / window.innerHeight;;
+        let aspect = GAME_WIDTH / GAME_HEIGHT;
+        let scaleX = 0.8, scaleY = 0.8;
+        if (aspect <= aspectA) {
+            scaleX *= aspectA;
+            scaleY *= aspect;
+        }
+        else {
+            scaleX = (aspect / aspectA) * aspectA;
+            scaleY = (aspect / aspectA) * aspect;
+        }
+        p.x /= window.innerWidth;
+        p.y /= window.innerHeight;
+        p.x -= 0.5;
+        p.y -= 0.5;
+        p.x *= scaleX;
+        p.y *= scaleY;
+        p.x += 0.5;
+        p.y += 0.5;
+        p.x *= GAME_WIDTH;
+        p.y *= GAME_HEIGHT;
+    })
     
 }
 
@@ -99,6 +129,20 @@ FHW.prototype.load = async function(then) {
             }
         }, 10);
     }));
+
+    let images = [ 'cursor-normal', 'cursor-crossair', 'heart-full', 'heart-empty' ];
+    let prl = [];
+    for (let i=0; i<images.length; i++) {
+        prl.push(new Promise((resolve) => {
+            IMG[images[i]] = new Image();
+            IMG[images[i]].src = `images/${images[i]}.png`;
+            IMG[images[i]].onload = () => {
+                console.log(`Loaded image 'images/${images[i]}.png'`);
+                resolve();
+            }
+        }))
+    }
+    await Promise.all(prl);
 
     this.map.load(this.gameRender.worldRender);
 

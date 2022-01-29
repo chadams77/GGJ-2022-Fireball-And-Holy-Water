@@ -41,6 +41,7 @@ window.GameRender = function(canvasId, map) {
     this.uiCanvas.width = GAME_WIDTH;
     this.uiCanvas.height = GAME_HEIGHT;
     this.uiCtx = this.uiCanvas.getContext('2d');
+    this.uiCtx.imageSmoothingQuality = 'high';
     this.uiTexture = new THREE.CanvasTexture(this.uiCanvas, undefined, undefined, undefined, THREE.NearestFilter, THREE.NearestFilter);
 
     this.worldRender = new WorldRender(this, this.map);
@@ -124,10 +125,24 @@ GameRender.prototype.render = function(dt, time) {
     this.worldRender.render(dt, time);
 
     this.uiCtx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+
+    let totalHp = 5;
+    let haveHP = 3.5;
+    let hSize = 20;
+
+    for (let i=1; i<=totalHp; i++) {
+        let percent = Math.min(Math.max(haveHP - i, 0.), 1.);
+        let x = 8 + (i-1) * hSize, y = 8;
+        this.uiCtx.drawImage(IMG['heart-empty'], x, y, hSize, hSize);
+        this.uiCtx.drawImage(IMG['heart-full'], 0, 0, Math.round(20*percent), 20, x, y, Math.round(hSize*percent), hSize);
+    }
+
     this.uiCtx.font = 'normal normal normal 14px/normal Courier New';
     this.uiCtx.textAlign = 'left';
     this.uiCtx.fillStyle = '#fff';
-    this.uiCtx.fillText(`${Math.round(1/dt)} fps`, 16/1.5, 28/1.5);
+    this.uiCtx.fillText(`${Math.round(1/dt)} fps`, 16/1.5, GAME_HEIGHT - 28);
+
+    this.uiCtx.drawImage(IMG['cursor-normal'], GAME_MOUSE.x - 16, GAME_MOUSE.y - 16);
 
     this.uiTexture.needsUpdate = true;
 
