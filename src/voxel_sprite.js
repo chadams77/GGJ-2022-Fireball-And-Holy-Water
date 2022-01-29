@@ -29,7 +29,7 @@ VoxelSprite.prototype.load = async function(scene, lightSystem) {
                 g = data.data[off+1],
                 b = data.data[off+2],
                 a = data.data[off+3];
-            if (a > 128) {
+            if (a > 192) {
                 let V = [];
                 V.push(x, y, this.size*0.5);
                 V.push(r, g, b);

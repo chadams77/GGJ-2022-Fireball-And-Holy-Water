@@ -177,7 +177,9 @@ EnemySet.prototype.updateRender = function(dt, time) {
                     while ((k--) > 0) {
                         let x = Math.floor(Math.random()*16-8 + this.player.x);
                         let y = Math.floor(Math.random()*16-8 + this.player.y);
-                        if (!this.map.doesCollide(x, y) && (x||y) && !this.doesCollide(x, y)) {
+                        let dx = this.player.x - x, dy = this.player.y - y;
+                        let len = Math.sqrt(dx*dx+dy*dy);
+                        if (len > 1 && !this.map.doesCollide(x, y) && (x||y) && !this.doesCollide(x, y)) {
                             this.enemyCount[type] += 1;
                             this.list.push(new Enemy(
                                 this,

@@ -427,9 +427,6 @@ GameMap.prototype.updateRender = function(dt, time) {
     if (KEY_PRESSED[72]) {
         this.changeTheme(this.hellT > 0.5 ? 0 : 1);
     }
-    if (KEY_PRESSED[73]) {
-        SFX['get-ammo'].play(Math.random(), 0.5 + Math.random());
-    }
 
     this.enemySet.player = this.player;
     this.enemySet.updateRender(dt, time);

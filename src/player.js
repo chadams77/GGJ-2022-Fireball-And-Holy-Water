@@ -15,6 +15,7 @@ window.Player = function(x,y,angle,map,eset) {
         [ -1, 0],
         [ 0, -1]
     ];
+    this.inventory = { 'pistol': 0, 'holywater': 0, 'fireball': 0, 'shotgun': 0, 'rifle': 0 };
     this.eset = eset;
 };
 
@@ -73,6 +74,29 @@ Player.prototype.update = function(dt, time) {
         }
     }
     else {
+        let item = this.map.itemSet.doesCollide(this.x, this.y);
+        if (item && item.take()) {
+            let cnt = 1;
+            switch (item.type) {
+                case 'pistol':
+                    cnt = 10;
+                    break;
+                case 'shotgun':
+                    cnt = 5;
+                    break;
+                case 'rifle':
+                    cnt = 3;
+                    break;
+                case 'fireball':
+                    cnt = 2;
+                    break;
+                case 'holywater':
+                    cnt = 1;
+                default:
+                    break;
+            }
+            this.inventory[item.type] += cnt;
+        }
         if (KEY_DOWN[37] || KEY_DOWN[65]) {
             this.turnLeft();
         }

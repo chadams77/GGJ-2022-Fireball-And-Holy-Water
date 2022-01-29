@@ -162,12 +162,13 @@ GameRender.prototype.render = function(dt, time) {
         }
     };
 
-    mkBtn(6, 'fireball-icon', true, 0., 3);
-    mkBtn(5, 'holywater-icon', true, 0., 2);
+    let inv = this.map.player.inventory || {};
+    mkBtn(6, 'fireball-icon', inv['fireball'] > 0, 0., inv['fireball']);
+    mkBtn(5, 'holywater-icon', inv['holywater'] > 0, 0., inv['holywater']);
     mkBtn(3, 'rock-icon', true, 0., 0, true);
-    mkBtn(2, 'pistol-icon', true, 0., 10);
-    mkBtn(1, 'shotgun-icon', false, 0., 0);
-    mkBtn(0, 'rifle-icon', true, 0., 3);
+    mkBtn(2, 'pistol-icon', inv['pistol'] > 0, 0., inv['pistol']);
+    mkBtn(1, 'shotgun-icon', inv['shotgun'] > 0, 0., inv['shotgun']);
+    mkBtn(0, 'rifle-icon', inv['rifle'] > 0, 0., inv['rifle']);
 
     this.uiCtx.font = 'normal normal normal 14px/normal Courier New';
     this.uiCtx.textAlign = 'right';

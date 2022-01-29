@@ -12,7 +12,9 @@ window.Item = function(eset, map, player, x, y, type) {
 
     let dx = this.player.x - this.x, dy = this.player.y - this.y;
     let len = Math.sqrt(dx*dx+dy*dy);
-    SFX['walk-1'].play(1 / len, 1.25);
+    SFX['walk-1'].play(1 / (len+1), 1.25);
+
+    this.taken = false;
 
 };
 
@@ -37,6 +39,20 @@ Item.prototype.updateRender = function(dt, time) {
     return true;
 
 };
+
+Item.prototype.take = function() {
+
+    if (!this.taken) {
+        this.spawnT = 0.5;
+        this.taken = true;
+        SFX['get-ammo'].play(0.5, 0.9);
+        return true;
+    }
+    else {
+        return false;
+    }
+
+}
 
 
 ///
@@ -82,7 +98,9 @@ ItemSet.prototype.updateRender = function(dt, time) {
                     while ((k--) > 0) {
                         let x = Math.floor(Math.random()*16-8 + this.player.x);
                         let y = Math.floor(Math.random()*16-8 + this.player.y);
-                        if (!this.map.doesCollide(x, y) && (x||y) && !this.doesCollide(x, y)) {
+                        let dx = this.player.x - x, dy = this.player.y - y;
+                        let len = Math.sqrt(dx*dx+dy*dy);
+                        if (len > 1 && !this.map.doesCollide(x, y) && (x||y) && !this.doesCollide(x, y)) {
                             this.itemCount[type] += 1;
                             this.list.push(new Item(
                                 this,
