@@ -164,4 +164,5 @@ VoxelSprite.prototype.addSprite = function (x, y, z, angle) {
     this.inst1[off4+1] = y;
     this.inst1[off4+2] = z;
     this.inst1[off4+3] = angle || 0;
+    this.geometry.getAttribute('inst1').needsUpdate = true;
 };

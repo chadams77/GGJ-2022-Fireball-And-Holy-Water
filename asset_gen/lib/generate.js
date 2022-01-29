@@ -13,7 +13,7 @@ require('./seedrandom.js');
 
 const fs = require('fs');
 const sdf_shaders = require('./sdf_shaders').SDF_SHADERS;
-const sleep = async (time) => new Promise((resolve) => (setTimeout(() => resolve())));
+const sleep = async (time) => new Promise((resolve) => (setTimeout(() => resolve(), Math.ceil(time*1000.))));
 
 const FLOAT = exports.FLOAT = (val) => {
     let str = `${val||0.}`;
@@ -165,7 +165,7 @@ exports.GenerateVoxels = async (outFile, args) => {
         slices.push(
             await RenderSlice(size, colorShader, z)
         );
-        await sleep(1/60);
+        await sleep(10/60);
     }
 
     let GET = (x, y, z) => {
