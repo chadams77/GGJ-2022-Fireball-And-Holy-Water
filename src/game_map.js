@@ -190,8 +190,8 @@ GameMap.prototype.load = function(worldRender) {
         }
         vec3 waterColor(vec3 p) {
             return mix(
-                mix(vec3(0.05, 0.1, 0.6) * 0.5, vec3(0.6, 0.1, 0.05) * 0.5, hellT),
-                mix(vec3(0.75, 0.75, 0.75), vec3(0.75, 0.75, 0.2), hellT),
+                mix(vec3(0.05, 0.1, 0.6) * 0.5, vec3(0.75, 0.0, 0.0) * 0.5, hellT),
+                mix(vec3(0.75, 0.75, 0.75), vec3(1., 1., 0.5), hellT),
                 clamp(pow(NO_Z(p*83.7+vec3(time/3.)) * 0.5 + 0.5, 4.0), 0., 1.)
             );
         }

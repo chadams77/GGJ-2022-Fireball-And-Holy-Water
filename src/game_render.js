@@ -137,10 +137,42 @@ GameRender.prototype.render = function(dt, time) {
         this.uiCtx.drawImage(IMG['heart-full'], 0, 0, Math.round(20*percent), 20, x, y, Math.round(hSize*percent), hSize);
     }
 
+    let mkBtn = (i, icon, enabled, cooldown, count, sel) => {
+        let x = GAME_WIDTH - i * 32 - 32 - 8;
+        let y = GAME_HEIGHT - 32 - 8;
+        this.uiCtx.drawImage(IMG['button-disabled'], x, y);
+        cooldown = cooldown || 0.;
+        if (enabled && cooldown <= 0.) {
+            this.uiCtx.drawImage(IMG[sel ? 'button-sel' : 'button'], 0, 0, Math.round(32*(1-cooldown)), 32, x, y, Math.round(32*(1-cooldown)), 32);
+        }
+        if (enabled && icon) {
+            if (cooldown > 0.) {
+                this.uiCtx.globalAlpha = 0.25;
+            }
+            this.uiCtx.drawImage(IMG[icon], x, y);
+            this.uiCtx.globalAlpha = 1.;
+        }
+        if (count) {
+            this.uiCtx.font = 'bold bold bold 12px/bold Courier New';
+            this.uiCtx.textAlign = 'right';
+            this.uiCtx.fillStyle = enabled ? '#fff' : '#fff';
+            this.uiCtx.lineWidth = 2.;
+            this.uiCtx.fillText(`${count}`, x + 25, y + 34.5);
+            this.uiCtx.lineWidth = 1.;
+        }
+    };
+
+    mkBtn(6, 'fireball-icon', true, 0., 3);
+    mkBtn(5, 'holywater-icon', true, 0., 2);
+    mkBtn(3, 'rock-icon', true, 0., 0, true);
+    mkBtn(2, 'pistol-icon', true, 0., 10);
+    mkBtn(1, 'shotgun-icon', false, 0., 0);
+    mkBtn(0, 'rifle-icon', true, 0., 3);
+
     this.uiCtx.font = 'normal normal normal 14px/normal Courier New';
-    this.uiCtx.textAlign = 'left';
+    this.uiCtx.textAlign = 'right';
     this.uiCtx.fillStyle = '#fff';
-    this.uiCtx.fillText(`${Math.round(1/dt)} fps`, 16/1.5, GAME_HEIGHT - 28);
+    this.uiCtx.fillText(`${Math.round(1/dt)} fps`, GAME_WIDTH - 10, 15);
 
     this.uiCtx.drawImage(IMG['cursor-normal'], GAME_MOUSE.x - 16, GAME_MOUSE.y - 16);
 

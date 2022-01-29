@@ -134,7 +134,12 @@ FHW.prototype.load = async function(then) {
         }, 10);
     }));
 
-    let images = [ 'cursor-normal', 'cursor-crossair', 'heart-full', 'heart-empty' ];
+    let images = [
+        'cursor-normal', 'cursor-crossair',
+        'heart-full', 'heart-empty',
+        'pistol-icon', 'rifle-icon', 'shotgun-icon', 'rock-icon', 'fireball-icon', 'holywater-icon',
+        'button', 'button-sel', 'button-disabled'
+    ];
     let prl = [];
     for (let i=0; i<images.length; i++) {
         prl.push(new Promise((resolve) => {
