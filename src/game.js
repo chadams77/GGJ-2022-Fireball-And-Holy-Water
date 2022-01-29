@@ -138,7 +138,8 @@ FHW.prototype.load = async function(then) {
         'cursor-normal', 'cursor-crossair',
         'heart-full', 'heart-empty',
         'pistol-icon', 'rifle-icon', 'shotgun-icon', 'rock-icon', 'fireball-icon', 'holywater-icon',
-        'button', 'button-sel', 'button-disabled'
+        'button', 'button-sel', 'button-disabled',
+        'pistol-item', 'rifle-item', 'shotgun-item', 'rock-item', 'fireball-item', 'holywater-item',
     ];
     let prl = [];
     for (let i=0; i<images.length; i++) {
@@ -152,6 +153,14 @@ FHW.prototype.load = async function(then) {
         }))
     }
     await Promise.all(prl);
+
+    let imgToVSPR = [
+        'pistol-item', 'rifle-item', 'shotgun-item', 'rock-item', 'fireball-item', 'holywater-item'
+    ];
+
+    for (let I of imgToVSPR) {
+        VSPR[I] = await (new VoxelSprite(I, IMG[I].width, 32, 24., IMG[I])).load(this.gameRender.worldRender.scene, this.map.lightSystem);
+    }
 
     this.map.load(this.gameRender.worldRender);
 

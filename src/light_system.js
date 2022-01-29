@@ -29,6 +29,8 @@ window.LightSystem = function (maxLights) {
         uniform sampler2D depthTex;
         uniform mat4 shadowMatrix;
 
+        float _f_emissive = 0.;
+
         vec3 getShadowCoord (vec3 pos) {
             mat4 biasMatrix;
             biasMatrix[0] = vec4(0.5, 0.0, 0.0, 0.0);
@@ -70,6 +72,9 @@ window.LightSystem = function (maxLights) {
                 }
             }
             float _origZ = gl_FragCoord.z / gl_FragCoord.w;
+            if (_f_emissive > 0.5) {
+                outClr.rgb += inColor.rgb;
+            }
             outClr.rgb = mix(outClr.rgb, fogColor, clamp(_origZ / ${GLSL_INSERT.FLOAT(10. * 64.)}, 0., 1.));
             return clamp(outClr, vec4(0.), vec4(1.));
         }

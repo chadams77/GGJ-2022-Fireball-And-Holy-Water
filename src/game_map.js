@@ -18,6 +18,7 @@ window.GameMap = function(size) {
 
     this.lightSystem = new LightSystem();
     this.enemySet = new EnemySet(this, {'skull': 0.75, 'gdemon': 0.25}, {'skull': 2, 'gdemon': 1});
+    this.itemSet = new ItemSet(this, {'pistol': 0.25, 'holywater': 0.125, 'fireball': 0.125}, {'pistol': 2, 'holywater': 2, 'fireball': 2});
 
 };
 
@@ -394,7 +395,7 @@ GameMap.prototype.load = function(worldRender) {
     this.worldRender.scene.add(this.mesh);
     this.lightSystem.shadowScene.add(this.smesh);
  
-    this.player = new Player(31, 31, 0., this, this.enemySet);
+    this.player = new Player(31, 31, 0., this, this.enemySet, this.itemSet);
     this.hellT = 0.;
     this.toHellT = 0.;
     sounds['sfx/music-normal.wav'].loop = true;
@@ -432,6 +433,8 @@ GameMap.prototype.updateRender = function(dt, time) {
 
     this.enemySet.player = this.player;
     this.enemySet.updateRender(dt, time);
+    this.itemSet.player = this.player;
+    this.itemSet.updateRender(dt, time);
 
 };
 

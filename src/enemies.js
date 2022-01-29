@@ -103,6 +103,14 @@ Enemy.prototype.updateRender = function(dt, time) {
     this.x += (this.toX - this.x) * dt * 4 / this.turnLength;
     this.y += (this.toY - this.y) * dt * 4 / this.turnLength;
 
+    if (this.type != 'boss') {
+        let sdx = this.player.x - this.x, sdy = this.player.y - this.y;
+        let len = Math.sqrt(sdx*sdx+sdy*sdy);
+        if (len > 15) {
+            return false;
+        }
+    }
+
     let float = Math.sin(time*Math.PI*0.5) * 0.05;
     let attackT = this.attacking ? (Math.max(0., Math.pow(Math.sin((this.turnT/this.turnLength)*2*Math.PI)*0.5+0.5, 2.) - .9) / 0.1) : 0.;
 

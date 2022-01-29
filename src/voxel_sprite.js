@@ -1,14 +1,44 @@
-window.VoxelSprite = function(url, size, maxDraw, scale) {
+window.VoxelSprite = function(url, size, maxDraw, scale, fromImage) {
     this.url = url;
     this.size = size;
     this.loaded = false;
     this.maxDraw = maxDraw || 1;
     this.scale = scale || 1.;
+    this.fromImage = fromImage;
 };
 
 VoxelSprite.prototype.load = async function(scene, lightSystem) {
-    let res = await (await fetch(`images/${this.url}-vox.json`)).json();
-    console.log(`Loaded '${this.url}': ${res.length} Voxels.`);
+    let res = null;
+    if (!this.fromImage) {
+        res = await (await fetch(`images/${this.url}-vox.json`)).json();
+        console.log(`Loaded '${this.url}': ${res.length} Voxels.`);
+    }
+    else {
+        const canvas = document.createElement('canvas');
+        canvas.width = canvas.height = this.size;
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, this.size, this.size);
+        ctx.drawImage(this.fromImage, 0, 0);
+        let data = ctx.getImageData(0, 0, this.size, this.size);
+        res = [];
+        for (let i=0; i<(this.size*this.size); i++) {
+            let x = i%this.size;
+            let y = (i-x)/this.size;
+            let off = (x+y*this.size)*4;
+            let r = data.data[off],
+                g = data.data[off+1],
+                b = data.data[off+2],
+                a = data.data[off+3];
+            if (a > 128) {
+                let V = [];
+                V.push(x, y, this.size*0.5);
+                V.push(r, g, b);
+                V.push(127., 127., 0.);
+                res.push(V);
+            }
+        }
+        console.log(`Sprite->Voxel '${this.url}': ${res.length} Voxels.`);
+    }
     this.loaded = true;
     this.scene = scene;
     this.lightSystem = lightSystem;
@@ -113,6 +143,7 @@ VoxelSprite.prototype.initMesh = function(json) {
             ${this.lightSystem.fragShader}
         
             void main() {
+                ${this.fromImage ? `_f_emissive = 1.;` : ``}
                 gl_FragColor = computeLight(vec4(vColor, 1.), vWorldPos, vNormal);
             }
         `,    
