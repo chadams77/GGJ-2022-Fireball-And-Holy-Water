@@ -62,8 +62,8 @@ window.FHW = function (canvasId) {
         }
         this.soundLoadClicked = true;
         sounds.load([
-            "sfx/music-normal.wav",
-            "sfx/music-hell.wav",
+            "sfx/music-normal.mp3",
+            "sfx/music-hell.mp3",
             "sfx/get-ammo.wav",
             "sfx/walk-1.wav",
             "sfx/walk-2.wav",

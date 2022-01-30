@@ -612,12 +612,12 @@ GameMap.prototype.load = function(worldRender) {
     this.player = new Player(this.startX, this.startY, 0., this, this.enemySet, this.itemSet);
     this.hellT = 0.;
     this.toHellT = 0.;
-    sounds['sfx/music-normal.wav'].loop = true;
-    sounds['sfx/music-normal.wav'].play();
-    sounds['sfx/music-normal.wav'].volume = (1 - this.hellT) * 0.99 + 0.01;
-    sounds['sfx/music-hell.wav'].loop = true;
-    sounds['sfx/music-hell.wav'].play();
-    sounds['sfx/music-hell.wav'].volume = this.hellT * 0.99 + 0.01;
+    sounds['sfx/music-normal.mp3'].loop = true;
+    sounds['sfx/music-normal.mp3'].play();
+    sounds['sfx/music-normal.mp3'].volume = (1 - this.hellT) * 0.99 + 0.01;
+    sounds['sfx/music-hell.mp3'].loop = true;
+    sounds['sfx/music-hell.mp3'].play();
+    sounds['sfx/music-hell.mp3'].volume = this.hellT * 0.99 + 0.01;
 
 };
 
@@ -636,8 +636,8 @@ GameMap.prototype.updateRender = function(dt, time) {
     this.smaterial.uniforms.time.value = time;
 
     this.hellT += (this.toHellT - this.hellT) * dt * 4;
-    sounds['sfx/music-normal.wav'].volume = (1 - this.hellT) * 0.99 + 0.01;
-    sounds['sfx/music-hell.wav'].volume = this.hellT * 0.99 + 0.01;
+    sounds['sfx/music-normal.mp3'].volume = (1 - this.hellT) * 0.99 + 0.01;
+    sounds['sfx/music-hell.mp3'].volume = this.hellT * 0.99 + 0.01;
     this.material.uniforms.hellT.value = this.hellT;
     this.smaterial.uniforms.hellT.value = this.hellT;
     this.lightSystem.setFogColor(new THREE.Vector3(this.hellT * 0.6 + (1 - this.hellT) * (!this.level ? 0.5 : 0.), (1 - this.hellT) * (!this.level ? 0.5 : 0.), (1 - this.hellT) * (!this.level ? 0.5 : 0.)));
@@ -673,8 +673,8 @@ GameMap.prototype.destroy = function() {
     this.material.dispose();
     this.smaterial.dispose();
     this.geometry = this.material = this.smaterial = this.mesh = this.smesh = undefined;
-    sounds['sfx/music-normal.wav'].pause();
-    sounds['sfx/music-hell.wav'].pause();
+    sounds['sfx/music-normal.mp3'].pause();
+    sounds['sfx/music-hell.mp3'].pause();
 
 };
 
