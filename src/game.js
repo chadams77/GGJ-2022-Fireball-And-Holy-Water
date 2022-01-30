@@ -77,7 +77,8 @@ window.FHW = function (canvasId) {
             "sfx/demon-die-1.wav",
             "sfx/demon-die-2.wav",
             "sfx/demon-die-3.wav",
-            "sfx/demon-die-4.wav"
+            "sfx/demon-die-4.wav",
+            "sfx/explosion.wav"
         ]);
         sounds.whenLoaded = () => {
             SFX['get-ammo'] = new SoundEffect("sfx/get-ammo.wav");
@@ -91,6 +92,7 @@ window.FHW = function (canvasId) {
             SFX['rifle'] = new SoundEffect("sfx/rifle.wav");
             SFX['fireball'] = new SoundEffect("sfx/fireball.wav");
             SFX['damage'] = new SoundEffect("sfx/damage-1.wav");
+            SFX['explosion'] = new SoundEffect("sfx/explosion.wav");
             SFX['demon-die-1'] = new SoundEffect("sfx/demon-die-1.wav");
             SFX['demon-die-2'] = new SoundEffect("sfx/demon-die-2.wav");
             SFX['demon-die-3'] = new SoundEffect("sfx/demon-die-3.wav");
@@ -166,10 +168,13 @@ FHW.prototype.load = async function(then) {
         { key: 'ydemon-chest', size: 64., maxDraw: 32, scale: 34. },
         { key: 'ydemon-hands', size: 128., maxDraw: 32, scale: 48.*(128/92) },
         { key: 'ydemon-hands-attack', size: 164., maxDraw: 32, scale: 48.*(164/92) },
+        { key: 'fireball-yellow', size: 64., maxDraw: 128, scale: 16., emissive: true },
+        { key: 'fireball-red', size: 64., maxDraw: 128, scale: 32., emissive: true },
+        { key: 'rock', size: 32., maxDraw: 128, scale: 8. },
     ];
 
     for (let i=0; i<load.length; i++) {
-        load[i] = (new VoxelSprite(load[i].key, load[i].size, load[i].maxDraw, load[i].scale)).load(this.gameRender.worldRender.scene, this.map.lightSystem);
+        load[i] = (new VoxelSprite(load[i].key, load[i].size, load[i].maxDraw, load[i].scale, null, load[i].emissive)).load(this.gameRender.worldRender.scene, this.map.lightSystem);
     }
     let loaded = await Promise.all(load);
     for (let L of loaded) {

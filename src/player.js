@@ -190,15 +190,26 @@ Player.prototype.update = function(dt, time) {
             let baseDmg = farT * farDmg + (1 - farT) * nearDmg;
             let randDmg = (farT * farRDmg + (1 - farT) * nearRDmg) * Math.random();
             let dmg = Math.random() < acc ? Math.ceil(baseDmg + randDmg) : 0;
-            this.dmgDelts.push({
-                dmg,
-                x: GAME_MOUSE.x,
-                y: GAME_MOUSE.y,
-                t: Math.sqrt(dmg||8),
-                yt: 0.
-            });
-            if (dmg) {
-                this.targetEnemy.damage(dmg);
+
+            let targetEnemy = this.targetEnemy;
+            let onFinish = () => {
+                this.dmgDelts.push({
+                    dmg,
+                    x: GAME_MOUSE.x,
+                    y: GAME_MOUSE.y,
+                    t: Math.sqrt(dmg||8),
+                    yt: 0.
+                });
+                if (dmg) {
+                    targetEnemy.damage(dmg);
+                }   
+            };
+
+            if (weapon === 'rock' || weapon === 'fireball') {
+                this.map.proj.fire(weapon === 'rock' ? 'rock' : 'fireball-yellow', this, this.targetEnemy, dmg < 1, onFinish);
+            }
+            else {
+                onFinish();
             }
         }
         if (this.map && this.map.map[this.x] && (this.map.map[this.x][this.y] == 6)) {

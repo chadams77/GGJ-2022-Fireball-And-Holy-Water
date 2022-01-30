@@ -1,10 +1,11 @@
-window.VoxelSprite = function(url, size, maxDraw, scale, fromImage) {
+window.VoxelSprite = function(url, size, maxDraw, scale, fromImage, emissive) {
     this.url = url;
     this.size = size;
     this.loaded = false;
     this.maxDraw = maxDraw || 1;
     this.scale = scale || 1.;
     this.fromImage = fromImage;
+    this.emissive = !!emissive || !!fromImage;
 };
 
 VoxelSprite.prototype.load = async function(scene, lightSystem) {
@@ -143,7 +144,7 @@ VoxelSprite.prototype.initMesh = function(json) {
             ${this.lightSystem.fragShader}
         
             void main() {
-                ${this.fromImage ? `_f_emissive = 1.;` : ``}
+                ${this.emissive ? `_f_emissive = 1.;` : ``}
                 gl_FragColor = computeLight(vec4(vColor, 1.), vWorldPos, vNormal);
             }
         `,    

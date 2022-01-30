@@ -81,6 +81,8 @@ window.GameMap = function(size, level, onNextLevel, lightSystem) {
     this.fodCallback = null;
     this.fodT = null;
 
+    this.proj = new Projectiles(this);
+
 };
 
 GameMap.prototype.fadeOutDestroy = function(cbk) {
@@ -642,6 +644,7 @@ GameMap.prototype.updateRender = function(dt, time) {
     this.enemySet.updateRender(dt, time);
     this.itemSet.player = this.player;
     this.itemSet.updateRender(dt, time);
+    this.proj.update(dt, time);
 
     if (this.fodCallback) {
         this.fodT -= dt;
