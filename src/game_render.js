@@ -122,6 +122,11 @@ GameRender.prototype.render = function(dt, time) {
     }
 
     this.uiCtx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+    if (!this.map || !this.map.player) {
+        this.uiCtx.fillStyle = '#000';
+        this.uiCtx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+        return;
+    }
 
     let DD = this.map.player.dmgDelts || [];
     for (let i=0; i<DD.length; i++) {
@@ -132,13 +137,13 @@ GameRender.prototype.render = function(dt, time) {
             DD.splice(i, 1); i--; continue;
         }
         this.uiCtx.globalAlpha = Math.min(D.t*4, 1.);
-        this.uiCtx.font = `${16+Math.ceil(Math.pow(D.dmg, 0.75))}px bold Courier New`;
+        this.uiCtx.font = `${16+Math.ceil(Math.pow(D.dmg||8, 0.75))}px bold Courier New`;
         this.uiCtx.textAlign = 'center';
         this.uiCtx.fillStyle = '#ff0';
         this.uiCtx.lineWidth = 3.;
         this.uiCtx.strokeStyle = '#000';
-        this.uiCtx.strokeText(`${D.dmg}`, D.x, D.y - D.yt - 34);
-        this.uiCtx.fillText(`${D.dmg}`, D.x, D.y - D.yt - 34);
+        this.uiCtx.strokeText(`${D.dmg || 'miss'}`, D.x, D.y - D.yt - 34);
+        this.uiCtx.fillText(`${D.dmg || 'miss'}`, D.x, D.y - D.yt - 34);
         this.uiCtx.globalAlpha = 1.;
     }
 
@@ -221,6 +226,13 @@ GameRender.prototype.render = function(dt, time) {
     //this.uiCtx.fillText(`${Math.round(this.worldRender.mouseAngle/Math.PI*180)} - ${Math.round(this.map.player.angle*90)}`, GAME_WIDTH - 10, 15);
 
     this.uiCtx.drawImage(IMG[(this.worldRender.targetEnemey && !hover) ? 'cursor-crossair' : 'cursor-normal'], GAME_MOUSE.x - 16, GAME_MOUSE.y - 16);
+
+    if (this.map.fodCallback) {
+        this.uiCtx.globalAlpha = 1. - (this.map.fodT);
+        this.uiCtx.fillStyle = '#000';
+        this.uiCtx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+        this.uiCtx.globalAlpha = 1.;
+    }
 
     this.worldRender.render(dt, time);
 

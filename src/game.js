@@ -8,7 +8,30 @@ window.FHW = function (canvasId) {
     window.IMG = {};
 
     this.renderLoop = new RenderLoop(this.updateRender.bind(this));
-    this.map = new GameMap(64);
+    this.lightSystem = new LightSystem();
+    this.map = new GameMap(64, 0, () => {
+        let player = this.map.player;
+        let inventory = player.inventory;
+        this.map.fadeOutDestroy(()=>{
+            this.map = new GameMap(64, 1, () => {
+                let player = this.map.player;
+                let inventory = player.inventory;
+                this.map.fadeOutDestroy(()=>{
+                    this.map = new GameMap(32, 2, () => {
+                        // win game
+                    }, this.lightSystem);
+                    this.gameRender.map = this.map;
+                    this.map.load(this.gameRender.worldRender);
+                    this.map.player.inventory = inventory;
+                    this.map.player.hp = this.map.player.maxHP = 7;
+                });
+            }, this.lightSystem);
+            this.gameRender.map = this.map;
+            this.map.load(this.gameRender.worldRender);
+            this.map.player.inventory = inventory;
+            this.map.player.hp = this.map.player.maxHP = 5;
+        });
+    }, this.lightSystem);
     this.gameRender = new GameRender(canvasId, this.map);
 
     if (this.gameRender.webGLError) {

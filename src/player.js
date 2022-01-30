@@ -194,10 +194,18 @@ Player.prototype.update = function(dt, time) {
                 dmg,
                 x: GAME_MOUSE.x,
                 y: GAME_MOUSE.y,
-                t: Math.sqrt(dmg),
+                t: Math.sqrt(dmg||8),
                 yt: 0.
             });
-            this.targetEnemy.damage(dmg);
+            if (dmg) {
+                this.targetEnemy.damage(dmg);
+            }
+        }
+        if (this.map && this.map.map[this.x] && (this.map.map[this.x][this.y] == 6)) {
+            if (this.map.onNextLevel) {
+                this.map.onNextLevel();
+                this.map.onNextLevel = null;
+            }
         }
         if (KEY_DOWN[37] || KEY_DOWN[65]) {
             this.turnLeft();

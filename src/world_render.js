@@ -5,7 +5,7 @@ window.WorldRender = function(parent, map) {
 
     this.renderTarget = new THREE.WebGLRenderTarget(GAME_WIDTH*2, GAME_HEIGHT*2, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter });
     this.scene = new THREE.Scene();
-    this.camera = new THREE.PerspectiveCamera(65, GAME_WIDTH/GAME_HEIGHT, 0.1, this.map.scale*11.);
+    this.camera = new THREE.PerspectiveCamera(50, GAME_WIDTH/GAME_HEIGHT, 0.1, this.map.scale*11.);
 
     this.texture = this.renderTarget.texture;
 
@@ -20,15 +20,22 @@ WorldRender.prototype.render = function(dt, time) {
 
     this.map.updateRender(dt, time);
 
+    if (!this.map.player) {
+        return;
+    }
+
+    let lookAng = -Math.PI * 0.25 * (GAME_MOUSE.x - GAME_WIDTH * 0.5) / GAME_WIDTH
+
     let camZ = (0.75+0.025*Math.abs(Math.sin(this.map.player.moveT*Math.PI*2.)))*this.map.scale;
     this.camera.up.set(0, 0, 1);
     this.camera.position.set(this.map.player.x * this.map.scale, this.map.player.y * this.map.scale, camZ);
-    this.camera.lookAt(this.map.player.x * this.map.scale + Math.cos(this.map.player.angle * Math.PI * 0.5), this.map.player.y * this.map.scale + Math.sin(this.map.player.angle * Math.PI * 0.5), camZ);
+    this.camera.lookAt(this.map.player.x * this.map.scale + Math.cos(this.map.player.angle * Math.PI * 0.5 + lookAng), this.map.player.y * this.map.scale + Math.sin(this.map.player.angle * Math.PI * 0.5 + lookAng), camZ);
     this.camera.updateMatrix(true);
     this.camera.updateMatrixWorld(true);
 
-    this.map.lightSystem.addDynamic(new THREE.Vector3(0.7, 0.7, 0.3), new THREE.Vector3(this.map.player.x * this.map.scale, this.map.player.y * this.map.scale, camZ), this.map.scale * 2.5);
-    this.map.lightSystem.updateShadows(dt, time, Math.cos(this.map.player.angle * Math.PI * 0.5), Math.sin(this.map.player.angle * Math.PI * 0.5));
+    this.map.lightSystem.addDynamic(new THREE.Vector3(0.7, 0.7, 0.7), new THREE.Vector3(this.map.player.x * this.map.scale, this.map.player.y * this.map.scale, camZ), this.map.scale * (this.map.level ? 4 : 2.5));
+    this.map.lightSystem.addDynamic(new THREE.Vector3(1.5, 0.0, 0.0), new THREE.Vector3(this.map.exitX * this.map.scale, this.map.exitY * this.map.scale, 0.), this.map.scale * 1.5);
+    this.map.lightSystem.updateShadows(dt, time, Math.cos(this.map.player.angle * Math.PI * 0.5 + lookAng), Math.sin(this.map.player.angle * Math.PI * 0.5 + lookAng));
 
     let vpPos = new THREE.Vector2(
         (GAME_MOUSE.x / (GAME_WIDTH)) * 2 - 1,

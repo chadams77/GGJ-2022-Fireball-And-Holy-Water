@@ -1,4 +1,4 @@
-window.GameMap = function(size) {
+window.GameMap = function(size, level, onNextLevel, lightSystem) {
     this.size = size;
     this.scale = 64.;
 
@@ -6,31 +6,195 @@ window.GameMap = function(size) {
     for (let i = 0; i < size; i++) {
         let row = [];
         for (let j = 0; j < size; j++) {
-            row.push((Math.abs(i-32)>8 || Math.abs(j-32)>8) ? ((i+j)%3 ? 2 : 3) : ((Math.abs(i-32)>3 || Math.abs(j-32)>3) ? (Math.random() > 0.75 ? (4 + (Math.random() < 0.5 ? 1 : 0)) : Math.floor(Math.pow(Math.random()*1.1, 2.))) : 0));
+            row.push((i === 0 || j === 0 || i === (size-1) || j === (size-1)) ? 3 : (!level ? 0 : 2));
         }
         this.map.push(row);
     }
 
+    if (!level) {
+        this.level = 0;
+        this.startX = 31;
+        this.startY = 48;
+        this.makeOpenArea(1, 33, 62, 62);
+        this.exitX = 2;
+        this.exitY = 2;
+        this.makeMaze(1, 1, 62, 30,  48, 30,  this.exitX, this.exitY);
+        this.map[this.exitX][this.exitY] = 6;
+        //this.map[this.startX][this.startY-3] = 6;
+        //this.exitX = this.startX;
+        //this.exitY = this.startY-3;
+        this.enemySet = new EnemySet(this, {'skull': 0.75, 'gdemon': 0.125}, {'skull': 3, 'gdemon': 1});
+        this.itemSet = new ItemSet(this, {'pistol': 0.125, 'holywater': 0.125, 'fireball': 0.05}, {'pistol': 2, 'holywater': 2, 'fireball': 1});
+    }
+    else if (level === 1) {
+        this.level = 1;
+        this.startX = 15;
+        this.startY = 15;
+        this.makeOpenArea(1, 1, 63, 63);
+        this.exitX = 62;
+        this.exitY = 62;
+        this.makeMaze(32, 1, 62, 32,  32, 16,  48, 32);
+        this.makeMaze(1, 32, 32, 62,  32, 48,  32, 48);
+        this.map[this.exitX][this.exitY] = 6;
+        this.enemySet = new EnemySet(this, {'skull': 0.25, 'gdemon': 0.5, 'ydemon': 0.25}, {'skull': 3, 'gdemon': 3, 'ydemon': 2});
+        this.itemSet = new ItemSet(this, {'pistol': 0.25, 'shotgun': 0.125, 'rifle': 0.125, 'holywater': 0.2, 'fireball': 0.1}, {'pistol': 3, 'holywater': 2, 'fireball': 1, 'shotgun': 2, 'rifle': 1});
+    }
+    else if (level === 2) {
+        this.level = 2;
+        this.startX = 15;
+        this.startY = 15;
+        this.makeOpenArea(1, 1, 31, 31);
+        this.map[this.exitX][this.exitY] = 6;
+        this.enemySet = new EnemySet(this, {'skull': 0.25, 'gdemon': 0.5, 'ydemon': 0.5, 'rdemon': 0.5}, {'skull': 3, 'gdemon': 3, 'ydemon': 2, 'rdemon': 1});
+        this.itemSet = new ItemSet(this, {'pistol': 0.35, 'shotgun': 0.25, 'rifle': 0.25, 'holywater': 0.3, 'fireball': 0.15}, {'pistol': 4, 'holywater': 3, 'fireball': 2, 'shotgun': 3, 'rifle': 2});
+    }
+
     this.canPass = {
         0: true,
-        2: true
+        2: true,
+        6: true,
+        8: true
     };
     this.canShootThrough = {
         0: true,
         2: true,
         5: true,
-        4: true
+        4: true,
+        6: true,
+        7: true,
+        8: true
     };
 
-    this.lightSystem = new LightSystem();
-    this.enemySet = new EnemySet(this, {'skull': 0.75, 'gdemon': 0.25}, {'skull': 2, 'gdemon': 1});
-    this.itemSet = new ItemSet(this, {'pistol': 0.25, 'holywater': 0.125, 'fireball': 0.125}, {'pistol': 2, 'holywater': 2, 'fireball': 2});
+    this.lightSystem = lightSystem;
+
+    this.onNextLevel = onNextLevel;
+
+    this.fodCallback = null;
+    this.fodT = null;
+
+};
+
+GameMap.prototype.fadeOutDestroy = function(cbk) {
+    this.fodCallback = cbk;
+    this.fodT = 1;
+}
+
+GameMap.prototype.makeOpenArea = function(x1, y1, x2, y2) {
+
+    for (let x=x1; x<=x2; x+=1) {
+        for (let y=y1; y<=y2; y+=1) {
+            if (Math.abs(this.startX - x) <= 3 && Math.abs(this.startY - y) <= 3) {
+                if (this.level > 0) {
+                    this.map[x][y] = 8;
+                }
+                continue;
+            }
+            if (x>(x1+2) && y>(y1+2) && x<(x2-2) && y<(y2-2)) {
+                let xa = Math.floor(x/3);
+                let xb = Math.floor(y/3);
+                if (!(xa%3) && !(xb%3)) {
+                    if (this.level === 0) {
+                        this.map[x][y] = 5;
+                    }
+                    else {
+                        this.map[x][y] = 7;
+                    }
+                    continue;
+                }
+            }
+            if (x%2 || y%2) {
+                continue;
+            }
+            if (this.level === 0) {
+                if (Math.random() < 0.25) {
+                    this.map[x][y] = 4;
+                }
+                else if (Math.random() < 0.25) {
+                    this.map[x][y] = 1;
+                }
+            }
+            if (this.level > 0) {
+                if (Math.random() < 0.25) {
+                    this.map[x][y] = 7;
+                }
+                else if (Math.random() < 0.25) {
+                    this.map[x][y] = 1;
+                }
+            }
+        }
+    }
+
+};
+
+// start & end coords must be even
+GameMap.prototype.makeMaze = function(x1, y1, x2, y2, startX, startY, endX, endY) {
+
+    for (let x=x1; x<=x2; x+=1) {
+        for (let y=y1; y<=y2; y+=1) {
+            if (Math.abs(this.startX - x) <= 3 && Math.abs(this.startY - y) <= 3) {
+                continue;
+            }
+            if (this.level === 0) {
+                if (Math.random() < 0.125) {
+                    this.map[x][y] = 4;
+                }
+                else {
+                    this.map[x][y] = 1;
+                }
+            }
+            if (this.level > 0) {
+                if (Math.random() < 0.125) {
+                    this.map[x][y] = 7;
+                }
+                else {
+                    this.map[x][y] = 3;
+                }
+            }
+        }
+    }
+
+    let dirC = [[-2,0],[2,0],[0,-2],[0,2]];
+    let U = {};
+
+    let mark = (x, y) => {
+        U[x+','+y] = 1;
+        let history = [[x, y]];
+        for (let k=0; k<dirC.length; k++) {
+            let j = Math.floor(Math.random()*dirC.length);
+            let t = dirC[k];
+            dirC[k] = dirC[j];
+            dirC[j] = t;
+        }
+        for (let i=0; i<dirC.length; i++) {
+            let dir = dirC[i];
+            let xa = x + dir[0], ya = y + dir[1];
+            let xb = x + dir[0]/2, yb = y + dir[1]/2;
+            if (!U[xa+','+ya] && !U[xb+','+yb] && xa >= x1 && xa <= x2 && ya >= y1 && ya <= y2) {
+                U[xb+','+yb] = 1;
+                mark(xa, ya);
+            }
+        }
+    }
+
+    mark(startX, startY);
+
+    for (let key in U) {
+        let tok = key.split(',');
+        let x = parseInt(tok[0]), y = parseInt(tok[1]);
+        if (this.level === 0) {
+            this.map[x][y] = 0;
+        }
+        if (this.level === 1) {
+            this.map[x][y] = Math.random() < 0.75 ? 2 : 8;
+        }
+    }
 
 };
 
 GameMap.prototype.load = function(worldRender) {
 
     this.worldRender = worldRender;
+    this.worldRender.map = this;
 
     const divCount = 7;
 
@@ -73,7 +237,7 @@ GameMap.prototype.load = function(worldRender) {
             let off3 = i * 3;
             posArray[off3 + 0] += offset.x;
             posArray[off3 + 1] += offset.y;
-            posArray[off3 + 2] += offset.z ;
+            posArray[off3 + 2] += offset.z;
             
         }
         box.setAttribute('type', new THREE.BufferAttribute(typeArray, 1));
@@ -84,6 +248,17 @@ GameMap.prototype.load = function(worldRender) {
         for (let y = 0; y < this.size; y++) {
             let type = this.map[x][y] || 0;
             switch (type) {
+            case 8: // cave-light
+                makeBox(2, x, y, 0.0, 0.2);
+                break;
+            case 7: // cave-water
+                makeBox(4, x, y, -4., 0.2);
+                makeBox(2, x, y, 1.5, 3.5);
+                makeBox(3, x, y, -0.4, 0.1);
+                break;
+            case 6: // exit
+                makeBox(4, x, y, -4., 0.2);
+                break;
             case 5: // water
                 makeBox(3, x, y, -0.4, 0.1);
                 break;
@@ -214,6 +389,18 @@ GameMap.prototype.load = function(worldRender) {
             );
         }
 
+        vec3 exitOffset(vec3 p) {
+            vec2 xy = fract(p / vec3(${GLSL_INSERT.FLOAT(this.scale)}) + vec3(0.5)).xy - vec2(0.5);
+            return roundNoiseOffset(p*103.7) * 0.003 - vec3(0., 0., pow(max(0., 1. - length(xy)), 0.2) * 8.);
+        }
+        vec3 exitColor(vec3 p) {
+            return mix(
+                vec3(0.4, 0.4, 0.4) * 0.4,
+                mix(vec3(0.1, 0.6, 0.1), vec3(0.6, 0.1, 0.1), hellT),
+                clamp(pow(max(abs(RNO_X(p*103.7)), abs(RNO_Y(p*103.7))), 4.), 0., 1.)
+            );
+        }
+
         vec3 caveOffset(vec3 p) {
             return roundNoiseOffset(p*103.7) * 0.003;
         }
@@ -241,6 +428,9 @@ GameMap.prototype.load = function(worldRender) {
             if (vTypes1.w > 0.01) {
                 count += vTypes1.w; ret += waterOffset(p) * vec3(vTypes1.w);
             }
+            if (vTypes2.x > 0.01) {
+                count += vTypes2.x; ret += exitOffset(p) * vec3(vTypes2.x);
+            }
             if (count >= 0.01) {
                 return ret * vec3((1. / count) * ${GLSL_INSERT.FLOAT(this.scale)});
             }
@@ -264,6 +454,9 @@ GameMap.prototype.load = function(worldRender) {
             }
             if (vTypes1.w > 0.01) {
                 count += vTypes1.w; ret += waterColor(p) * vec3(vTypes1.w);
+            }
+            if (vTypes2.x > 0.01) {
+                count += vTypes2.x; ret += exitColor(p) * vec3(vTypes2.x);
             }
             if (count >= 0.01) {
                 return ret * vec3(1. / count);
@@ -401,7 +594,7 @@ GameMap.prototype.load = function(worldRender) {
     this.worldRender.scene.add(this.mesh);
     this.lightSystem.shadowScene.add(this.smesh);
  
-    this.player = new Player(31, 31, 0., this, this.enemySet, this.itemSet);
+    this.player = new Player(this.startX, this.startY, 0., this, this.enemySet, this.itemSet);
     this.hellT = 0.;
     this.toHellT = 0.;
     sounds['sfx/music-normal.wav'].loop = true;
@@ -419,6 +612,10 @@ GameMap.prototype.changeTheme = function(hellT) {
 
 GameMap.prototype.updateRender = function(dt, time) {
 
+    if (!this.player) {
+        return;
+    }
+
     this.player.update(dt, time);
     this.material.uniforms.time.value = time;
     this.smaterial.uniforms.time.value = time;
@@ -428,7 +625,7 @@ GameMap.prototype.updateRender = function(dt, time) {
     sounds['sfx/music-hell.wav'].volume = this.hellT * 0.99 + 0.01;
     this.material.uniforms.hellT.value = this.hellT;
     this.smaterial.uniforms.hellT.value = this.hellT;
-    this.lightSystem.setFogColor(new THREE.Vector3(this.hellT * 0.6 + (1 - this.hellT) * 0.5, (1 - this.hellT) * 0.5, (1 - this.hellT) * 0.5));
+    this.lightSystem.setFogColor(new THREE.Vector3(this.hellT * 0.6 + (1 - this.hellT) * (!this.level ? 0.5 : 0.), (1 - this.hellT) * (!this.level ? 0.5 : 0.), (1 - this.hellT) * (!this.level ? 0.5 : 0.)));
 
     this.changeTheme(this.player.fireballT > 0 ? 1 : 0);
   
@@ -436,6 +633,32 @@ GameMap.prototype.updateRender = function(dt, time) {
     this.enemySet.updateRender(dt, time);
     this.itemSet.player = this.player;
     this.itemSet.updateRender(dt, time);
+
+    if (this.fodCallback) {
+        this.fodT -= dt;
+        if (this.fodT <= 0.) {
+            this.destroy();
+            this.fodCallback();
+            this.fodCallback = null;
+            this.fodT = 0.;
+            return;
+        }
+    }
+
+};
+
+GameMap.prototype.destroy = function() {
+
+    this.map = [];
+    this.player = null;
+    this.worldRender.scene.remove(this.mesh);
+    this.lightSystem.shadowScene.remove(this.smesh);
+    this.geometry.dispose();
+    this.material.dispose();
+    this.smaterial.dispose();
+    this.geometry = this.material = this.smaterial = this.mesh = this.smesh = undefined;
+    sounds['sfx/music-normal.wav'].pause();
+    sounds['sfx/music-hell.wav'].pause();
 
 };
 
@@ -446,8 +669,8 @@ GameMap.prototype.rayCast = function(x, y, angle, maxDist) {
         let len = k/10;
         let x2 = x + dx * len, y2 = y + dy * len;
         let enemy = null;
-        let mapType = (this.map && this.map[Math.floor(x)] && (typeof this.map[Math.floor(x)][Math.floor(y)] === 'number')) ? this.map[Math.floor(x)][Math.floor(y)] : -1;
-        if (mapType === -1 || !this.canShootThrough[mapType]) {
+        let mapType = (this.map && this.map[Math.floor(x2)]) ? this.map[Math.floor(x2)][Math.floor(y2)] : undefined;
+        if (!this.canShootThrough[mapType]) {
             return { dist: len, x: Math.floor(x2), y: Math.floor(y2), map: true };
         }
         else if (enemy = this.enemySet.doesCollide(x2, y2)) {
