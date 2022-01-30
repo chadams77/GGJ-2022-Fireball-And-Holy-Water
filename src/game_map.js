@@ -19,7 +19,6 @@ window.GameMap = function(size, level, onNextLevel, lightSystem) {
         this.exitX = 2;
         this.exitY = 2;
         this.makeMaze(1, 1, 62, 30,  48, 30,  this.exitX, this.exitY);
-        this.map[this.exitX][this.exitY] = 6;
         //this.map[this.startX][this.startY-3] = 6;
         //this.exitX = this.startX;
         //this.exitY = this.startY-3;
@@ -35,7 +34,6 @@ window.GameMap = function(size, level, onNextLevel, lightSystem) {
         this.exitY = 62;
         this.makeMaze(32, 1, 62, 32,  32, 16,  48, 32);
         this.makeMaze(1, 32, 32, 62,  32, 48,  32, 48);
-        this.map[this.exitX][this.exitY] = 6;
         this.enemySet = new EnemySet(this, {'skull': 0.25, 'gdemon': 0.5, 'ydemon': 0.25}, {'skull': 3, 'gdemon': 3, 'ydemon': 2});
         this.itemSet = new ItemSet(this, {'pistol': 0.25, 'shotgun': 0.125, 'rifle': 0.125, 'holywater': 0.2, 'fireball': 0.1}, {'pistol': 3, 'holywater': 2, 'fireball': 1, 'shotgun': 2, 'rifle': 1});
     }
@@ -43,11 +41,22 @@ window.GameMap = function(size, level, onNextLevel, lightSystem) {
         this.level = 2;
         this.startX = 15;
         this.startY = 15;
-        this.makeOpenArea(1, 1, 31, 31);
         this.map[this.exitX][this.exitY] = 6;
         this.enemySet = new EnemySet(this, {'skull': 0.25, 'gdemon': 0.5, 'ydemon': 0.5, 'rdemon': 0.5}, {'skull': 3, 'gdemon': 3, 'ydemon': 2, 'rdemon': 1});
         this.itemSet = new ItemSet(this, {'pistol': 0.35, 'shotgun': 0.25, 'rifle': 0.25, 'holywater': 0.3, 'fireball': 0.15}, {'pistol': 4, 'holywater': 3, 'fireball': 2, 'shotgun': 3, 'rifle': 2});
     }
+
+    for (let xo=-2; xo<=2; xo++) {
+        for (let yo=-2; yo<=2; yo++) {
+            let x = this.exitX + xo;
+            let y = this.exitY + yo;
+            if (x > 0 && y > 0 && x < (this.size-1) && y < (this.size-1)) {
+                this.map[x][y] = !this.level ? 0 : 8;
+            }
+        }
+    }
+
+    this.map[this.exitX][this.exitY] = 6;
 
     this.canPass = {
         0: true,
