@@ -24,9 +24,15 @@ WorldRender.prototype.render = function(dt, time) {
         return;
     }
 
-    let lookAng = -Math.PI * 0.25 * (GAME_MOUSE.x - GAME_WIDTH * 0.5) / GAME_WIDTH
+    let lookAng = -Math.PI * 0.35 * (GAME_MOUSE.x - GAME_WIDTH * 0.5) / GAME_WIDTH
 
     let camZ = (0.75+0.025*Math.abs(Math.sin(this.map.player.moveT*Math.PI*2.)))*this.map.scale;
+    if (this.map.deathAnim) {
+        camZ *= 1. - Math.min(1., this.map.deathAnimT*2.) * 0.5;
+    }
+    if (this.map.fodCallback) {
+        camZ *= 1. - Math.min(1., 1. - this.map.fodT);
+    }
     this.camera.up.set(0, 0, 1);
     this.camera.position.set(this.map.player.x * this.map.scale, this.map.player.y * this.map.scale, camZ);
     this.camera.lookAt(this.map.player.x * this.map.scale + Math.cos(this.map.player.angle * Math.PI * 0.5 + lookAng), this.map.player.y * this.map.scale + Math.sin(this.map.player.angle * Math.PI * 0.5 + lookAng), camZ);

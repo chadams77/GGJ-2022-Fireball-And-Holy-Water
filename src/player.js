@@ -15,7 +15,7 @@ window.Player = function(x,y,angle,map,eset) {
         [ -1, 0],
         [ 0, -1]
     ];
-    this.inventory = { 'pistol': 10, 'holywater': 5, 'fireball': 5, 'shotgun': 6, 'rifle': 5 };
+    this.inventory = { 'pistol': 5, 'holywater': 2, 'fireball': 1, 'shotgun': 0, 'rifle': 0 };
     this.eset = eset;
     this.hp = 3;
     this.maxHP = 3;
@@ -44,8 +44,11 @@ Player.prototype.damage = function(amt) {
     }
     this.hp -= (amt || 0);
     if (this.hp < 0) {
+        SFX[`demon-die-${Math.floor(1 + Math.random()*4)}`].play(2., 1.5+Math.random()*0.1);
         this.hp = 0;
         this.dead = true;
+        this.map.deathAnim = true;
+        this.map.deathAnimT = 0.;
     }
 };
 

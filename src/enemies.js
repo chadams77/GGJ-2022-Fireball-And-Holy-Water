@@ -52,11 +52,21 @@ Enemy.prototype.damage = function(dmg) {
     }
 };
 
-Enemy.prototype.doAttack = function(farT, target) {
+Enemy.prototype.doAttack = function(target) {
     let type = this.type;
     if (type === 'ydemon' || type === 'rdemon') {
         SFX['fireball'].play(0.75);
     }
+
+    let sdx = this.player.x - this.x, sdy = this.player.y - this.y;
+    let len = Math.sqrt(sdx*sdx+sdy*sdy);
+    SFX['walk-2'].play(1.5 / len, 0.9);
+
+    if (this.map.rayCastMapOnly(this.x, this.y, Math.atan2(sdy, sdx), len)) {
+        return;
+    }
+
+    let farT = Math.max(0, Math.min(len/this.attackRange, 1));
 
     let nearAcc = 0, farAcc = 0;
     let nearDmg = 0, farDmg = 0;
@@ -73,12 +83,12 @@ Enemy.prototype.doAttack = function(farT, target) {
             nearRDmg = 2; farRDmg = 1;
             break;
         case 'ydemon':
-            nearAcc = 1.; farAcc = 0.5;
+            nearAcc = 0.5; farAcc = 0.1;
             nearDmg = 4; farDmg = 4;
             nearRDmg = 2; farRDmg = 2;
             break;
         case 'rdemon':
-            nearAcc = 1.; farAcc = 0.5;
+            nearAcc = 0.5; farAcc = 0.1;
             nearDmg = 8; farDmg = 7;
             nearRDmg = 3; farRDmg = 3;
             break;
@@ -134,8 +144,22 @@ Enemy.prototype.updateRender = function(dt, time) {
         let dy = this.player.y - this.y;
         let dist = Math.sqrt(dx*dx+dy*dy);
         if (dist <= this.attackRange) {
-            this.attacking = true;
-            this.doneAttack = false;
+            if (this.type === 'ydemon') {
+                if (Math.random() < 0.75) {
+                    this.attacking = true;
+                    this.doneAttack = false;
+                }
+            }
+            else if (this.type === 'rdemon') {
+                if (Math.random() < 0.5) {
+                    this.attacking = true;
+                    this.doneAttack = false;
+                }
+            }
+            else {
+                this.attacking = true;
+                this.doneAttack = false;
+            }
         }
         else {
             if (Math.abs(dx) > Math.abs(dy)) {
@@ -181,10 +205,7 @@ Enemy.prototype.updateRender = function(dt, time) {
     let attackT = this.attacking ? (Math.max(0., Math.pow(Math.sin((this.turnT/this.turnLength)*2*Math.PI)*0.5+0.5, 2.) - .9) / 0.1) : 0.;
 
     if (this.attacking && !this.doneAttack && (this.turnT/this.turnLength) > 0.1) {
-        let sdx = this.player.x - this.x, sdy = this.player.y - this.y;
-        let len = Math.sqrt(sdx*sdx+sdy*sdy);
-        SFX['walk-2'].play(1.5 / len, 0.9);
-        this.doAttack(Math.max(0, Math.min(len/this.attackRange, 1)), this.player);
+        this.doAttack(this.player);
         this.doneAttack = true;
     }
 

@@ -693,6 +693,21 @@ GameMap.prototype.rayCast = function(x, y, angle, maxDist) {
 
 };
 
+GameMap.prototype.rayCastMapOnly = function(x, y, angle, maxDist) {
+
+    let dx = Math.cos(angle), dy = Math.sin(angle);
+    for (let k=0; k<(10*maxDist); k++)   {
+        let len = k/10;
+        let x2 = x + dx * len, y2 = y + dy * len;
+        let mapType = (this.map && this.map[Math.floor(x2)]) ? this.map[Math.floor(x2)][Math.floor(y2)] : undefined;
+        if (!this.canShootThrough[mapType]) {
+            return true;
+        }
+    }
+    return false;
+
+};
+
 GameMap.prototype.doesCollide = function(x, y) {
 
     return !!(this.map && this.map[x] && !this.canPass[this.map[x][y]]);

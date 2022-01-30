@@ -234,6 +234,17 @@ GameRender.prototype.render = function(dt, time) {
         this.uiCtx.globalAlpha = 1.;
     }
 
+    if (this.map.deathAnim) {
+        this.uiCtx.globalAlpha = Math.min(1, this.map.deathAnimT);
+        this.uiCtx.fillStyle = '#F00';
+        this.uiCtx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+        this.uiCtx.globalAlpha = 1.;
+        this.map.deathAnimT += dt/3;
+        if (this.map.deathAnimT >= 1.5) {
+            window.location.reload();
+        }
+    }
+
     this.worldRender.render(dt, time);
 
     this.uiTexture.needsUpdate = true;
