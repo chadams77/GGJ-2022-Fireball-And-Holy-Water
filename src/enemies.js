@@ -12,7 +12,7 @@ window.Enemy = function(eset, map, player, x, y, type) {
         'skull': 5,
         'gdemon': 10,
         'ydemon': 20,
-        'rdemon': 1,//80,
+        'rdemon': 100,
         'boss': 125
     }[type];
     this.deathT = 1.;
