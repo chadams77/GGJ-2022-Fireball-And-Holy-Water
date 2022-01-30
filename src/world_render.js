@@ -39,8 +39,16 @@ WorldRender.prototype.render = function(dt, time) {
     let vpDir = vpPos3D.clone().sub(center).normalize();
     this.mouseAngle = Math.atan2(vpDir.y, vpDir.x);
 
-    this.playerLookAt = this.map.rayCast(this.map.player.x, this.map.player.y, this.mouseAngle, {'rock': 3, 'pistol': 5, 'shotgun': 3, 'rifle': 10, 'fireball': 7}[this.map.player.weapon]);
+    let weaponRange = {'rock': 3, 'pistol': 5, 'shotgun': 3, 'rifle': 10, 'fireball': 7}[this.map.player.fireballT > 0. ? 'fireball' : this.map.player.weapon];
+    this.playerLookAt = this.map.rayCast(this.map.player.x, this.map.player.y, this.mouseAngle, weaponRange);
     this.targetEnemey = this.playerLookAt.enemy;
+    if (this.map.player.weaponCooldown > 0. || (this.map.player.fireballT <= 0. && (this.map.player.weapon !== 'rock' && this.map.player.inventory[this.map.player.weapon] < 1))) {
+        this.targetEnemey = null;
+    }
+    this.map.player.targetEnemy = this.targetEnemey;
+    if (this.targetEnemey && this.playerLookAt) {
+        this.map.player.targetEnemyDistT = this.playerLookAt.dist / weaponRange;
+    }
 
     inst.renderer.setRenderTarget(this.renderTarget);
     inst.renderer.setClearColor(new THREE.Color(this.map.lightSystem.uniforms.fogColor.value.x, this.map.lightSystem.uniforms.fogColor.value.y, this.map.lightSystem.uniforms.fogColor.value.z), 1.0);

@@ -44,7 +44,17 @@ window.FHW = function (canvasId) {
             "sfx/walk-1.wav",
             "sfx/walk-2.wav",
             "sfx/drink-1.wav",
-            "sfx/drink-2.wav"
+            "sfx/drink-2.wav",
+            "sfx/pistol.wav",
+            "sfx/shotgun.wav",
+            "sfx/rock.wav",
+            "sfx/rifle.wav",
+            "sfx/fireball.wav",
+            "sfx/damage-1.wav",
+            "sfx/demon-die-1.wav",
+            "sfx/demon-die-2.wav",
+            "sfx/demon-die-3.wav",
+            "sfx/demon-die-4.wav"
         ]);
         sounds.whenLoaded = () => {
             SFX['get-ammo'] = new SoundEffect("sfx/get-ammo.wav");
@@ -52,6 +62,16 @@ window.FHW = function (canvasId) {
             SFX['walk-2'] = new SoundEffect("sfx/walk-2.wav");
             SFX['drink-1'] = new SoundEffect("sfx/drink-1.wav");
             SFX['drink-2'] = new SoundEffect("sfx/drink-2.wav");
+            SFX['pistol'] = new SoundEffect("sfx/pistol.wav");
+            SFX['shotgun'] = new SoundEffect("sfx/shotgun.wav");
+            SFX['rock'] = new SoundEffect("sfx/rock.wav");
+            SFX['rifle'] = new SoundEffect("sfx/rifle.wav");
+            SFX['fireball'] = new SoundEffect("sfx/fireball.wav");
+            SFX['damage'] = new SoundEffect("sfx/damage-1.wav");
+            SFX['demon-die-1'] = new SoundEffect("sfx/demon-die-1.wav");
+            SFX['demon-die-2'] = new SoundEffect("sfx/demon-die-2.wav");
+            SFX['demon-die-3'] = new SoundEffect("sfx/demon-die-3.wav");
+            SFX['demon-die-4'] = new SoundEffect("sfx/demon-die-4.wav");
             this.soundsLoaded = true;
             document.body.removeChild(document.getElementById('load-button'));
             document.getElementById('c3d').style.display = 'block';

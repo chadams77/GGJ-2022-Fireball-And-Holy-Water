@@ -21,6 +21,10 @@ window.Player = function(x,y,angle,map,eset) {
     this.maxHP = 3;
     this.weapon = 'rock';
     this.fireballT = 0.;
+    this.healCooldown = 0.;
+    this.weaponCooldown = 0.;
+    this.weaponCooldownMax = 1.;
+    this.dmgDelts = [];
 };
 
 Player.prototype.heal = function(amt) {
@@ -28,6 +32,7 @@ Player.prototype.heal = function(amt) {
         return;
     }
     this.hp += (amt || 2.5);
+    this.healCooldown = 3.;
     if (this.hp > this.maxHP) {
         this.hp = this.maxHP;
     }
@@ -92,6 +97,14 @@ Player.prototype.update = function(dt, time) {
     if (this.fireballT < 0.) {
         this.fireballT = 0.;
     }
+    this.healCooldown -= dt;
+    if (this.healCooldown < 0.) {
+        this.healCooldown = 0.;
+    }
+    this.weaponCooldown -= dt;
+    if (this.weaponCooldown < 0.) {
+        this.weaponCooldown = 0.;
+    }
     if (this.moving) {
         this.moveT += dt * 4.;
         this.x = this.sx + (this.toX-this.sx) * Math.sin(this.moveT*Math.PI*0.5,0.5);
@@ -128,6 +141,63 @@ Player.prototype.update = function(dt, time) {
                     break;
             }
             this.inventory[item.type] += cnt;
+        }
+        if (this.targetEnemy && MOUSE_CLICK) {
+            let weapon = this.fireballT > 0. ? 'fireball' : this.weapon;
+            SFX[weapon].play(0.75);
+            if (weapon !== 'fireball') {
+                this.inventory[this.weapon] -= 1;
+            }
+            let nearAcc = 0, farAcc = 0;
+            let nearDmg = 0, farDmg = 0;
+            let nearRDmg = 0, farRDmg = 0;
+            let farT = this.targetEnemyDistT;
+            switch (weapon) {
+                case 'rock':
+                    this.weaponCooldownMax = this.weaponCooldown = 1.5;
+                    nearAcc = 0.85; farAcc = 0.5;
+                    nearDmg = 1; farDmg = 0;
+                    nearRDmg = 1; farRDmg = 2;
+                    break;
+                case 'pistol':
+                    this.weaponCooldownMax = this.weaponCooldown = 1.;
+                    nearAcc = 0.95; farAcc = 0.75;
+                    nearDmg = 2.5; farDmg = 1.5;
+                    nearRDmg = 1; farRDmg = 0;
+                    break;
+                case 'shotgun':
+                    this.weaponCooldownMax = this.weaponCooldown = 2.;
+                    nearAcc = 1.; farAcc = 0.75;
+                    nearDmg = 8; farDmg = 3;
+                    nearRDmg = 3; farRDmg = 0;
+                    break;
+                case 'rifle':
+                    this.weaponCooldownMax = this.weaponCooldown = 1.5;
+                    nearAcc = 1.; farAcc = 0.9;
+                    nearDmg = 7; farDmg = 7;
+                    nearRDmg = 1; farRDmg = 0;
+                    break;
+                case 'fireball':
+                    this.weaponCooldownMax = this.weaponCooldown = 1.;
+                    nearAcc = 1.; farAcc = 0.5;
+                    nearDmg = 5; farDmg = 5;
+                    nearRDmg = 3; farRDmg = 3;
+                    break;
+                default:
+                    break;
+            }
+            let acc = farT * farAcc + (1 - farT) * nearAcc;
+            let baseDmg = farT * farDmg + (1 - farT) * nearDmg;
+            let randDmg = (farT * farRDmg + (1 - farT) * nearRDmg) * Math.random();
+            let dmg = Math.random() < acc ? Math.ceil(baseDmg + randDmg) : 0;
+            this.dmgDelts.push({
+                dmg,
+                x: GAME_MOUSE.x,
+                y: GAME_MOUSE.y,
+                t: Math.sqrt(dmg),
+                yt: 0.
+            });
+            this.targetEnemy.damage(dmg);
         }
         if (KEY_DOWN[37] || KEY_DOWN[65]) {
             this.turnLeft();

@@ -1,6 +1,5 @@
 window.GameRender = function(canvasId, map) {
 
-
     this.canvasID = canvasId;
     this.canvas = document.getElementById(this.canvasID);
     this.width = window.innerWidth;
@@ -122,9 +121,26 @@ GameRender.prototype.render = function(dt, time) {
         return;
     }
 
-    this.worldRender.render(dt, time);
-
     this.uiCtx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+
+    let DD = this.map.player.dmgDelts || [];
+    for (let i=0; i<DD.length; i++) {
+        let D = DD[i];
+        D.t -= dt;
+        D.yt += D.t * dt * 6.;
+        if (D.t <= 0.) {
+            DD.splice(i, 1); i--; continue;
+        }
+        this.uiCtx.globalAlpha = Math.min(D.t*4, 1.);
+        this.uiCtx.font = `${16+Math.ceil(Math.pow(D.dmg, 0.75))}px bold Courier New`;
+        this.uiCtx.textAlign = 'center';
+        this.uiCtx.fillStyle = '#ff0';
+        this.uiCtx.lineWidth = 3.;
+        this.uiCtx.strokeStyle = '#000';
+        this.uiCtx.strokeText(`${D.dmg}`, D.x, D.y - D.yt - 34);
+        this.uiCtx.fillText(`${D.dmg}`, D.x, D.y - D.yt - 34);
+        this.uiCtx.globalAlpha = 1.;
+    }
 
     let totalHp = this.map.player.maxHP;
     let haveHP = this.map.player.hp;
@@ -136,6 +152,8 @@ GameRender.prototype.render = function(dt, time) {
         this.uiCtx.drawImage(IMG['heart-empty'], x, y, hSize, hSize);
         this.uiCtx.drawImage(IMG['heart-full'], 0, 0, Math.round(20*percent), 20, x, y, Math.round(hSize*percent), hSize);
     }
+
+    let hover = false;
 
     let mkBtn = (i, icon, enabled, cooldown, count, sel) => {
         let x = GAME_WIDTH - i * 32 - 32 - 8;
@@ -153,17 +171,20 @@ GameRender.prototype.render = function(dt, time) {
             this.uiCtx.globalAlpha = 1.;
         }
         if (count) {
-            this.uiCtx.font = 'bold bold bold 12px/bold Courier New';
+            this.uiCtx.font = '12px bold Courier New';
             this.uiCtx.textAlign = 'right';
             this.uiCtx.fillStyle = enabled ? '#fff' : '#fff';
             this.uiCtx.lineWidth = 2.;
             this.uiCtx.fillText(`${count}`, x + 25, y + 34.5);
             this.uiCtx.lineWidth = 1.;
         }
-        if (enabled && MOUSE_CLICK && GAME_MOUSE.x >= x && GAME_MOUSE.y >= y && GAME_MOUSE.x < (x+32) && GAME_MOUSE.y < (y+32)) {
-            MOUSE_CLICK = false;
-            SFX['get-ammo'].play(0.25, 1.5);
-            return true;
+        if (GAME_MOUSE.x >= x && GAME_MOUSE.y >= y && GAME_MOUSE.x < (x+32) && GAME_MOUSE.y < (y+32)) {
+            if (enabled && MOUSE_CLICK) {
+                MOUSE_CLICK = false;
+                SFX['get-ammo'].play(0.25, 1.5);
+                return true;
+            }
+            hover = true;
         }
         return false;
     };
@@ -174,32 +195,34 @@ GameRender.prototype.render = function(dt, time) {
         this.map.player.fireballT = 10.;
         SFX['drink-2'].play(0.5, 0.9);
     }
-    if (mkBtn(5, 'holywater-icon', inv['holywater'] > 0, 0., inv['holywater'])) {
+    if (mkBtn(5, 'holywater-icon', inv['holywater'] > 0, this.map.player.healCooldown/3., inv['holywater']) && this.map.player.healCooldown <= 0.) {
         inv['holywater'] -= 1;
         this.map.player.fireballT = 0.;
         this.map.player.heal();
         SFX['drink-1'].play(0.5, 1.);
     }
-    if (mkBtn(3, 'rock-icon', this.map.player.fireballT <= 0, 0., 0, this.map.player.weapon == 'rock')) {
+    if (mkBtn(3, 'rock-icon', this.map.player.fireballT <= 0, (this.map.player.weaponCooldown / this.map.player.weaponCooldownMax) * (this.map.player.weapon !== 'rock' ? 0 : 1), 0, this.map.player.weapon == 'rock')) {
         this.map.player.weapon = 'rock';
     }
-    if (mkBtn(2, 'pistol-icon', this.map.player.fireballT <= 0 && inv['pistol'] > 0, 0., inv['pistol'], this.map.player.weapon == 'pistol')) {
+    if (mkBtn(2, 'pistol-icon', this.map.player.fireballT <= 0 && inv['pistol'] > 0, (this.map.player.weaponCooldown / this.map.player.weaponCooldownMax) * (this.map.player.weapon !== 'pistol' ? 0 : 1), inv['pistol'], this.map.player.weapon == 'pistol')) {
         this.map.player.weapon = 'pistol';
     }
-    if (mkBtn(1, 'shotgun-icon', this.map.player.fireballT <= 0 &&inv['shotgun'] > 0, 0., inv['shotgun'], this.map.player.weapon == 'shotgun')) {
+    if (mkBtn(1, 'shotgun-icon', this.map.player.fireballT <= 0 && inv['shotgun'] > 0, (this.map.player.weaponCooldown / this.map.player.weaponCooldownMax) * (this.map.player.weapon !== 'shotgun' ? 0 : 1), inv['shotgun'], this.map.player.weapon == 'shotgun')) {
         this.map.player.weapon = 'shotgun';
     }
-    if (mkBtn(0, 'rifle-icon', this.map.player.fireballT <= 0 &&inv['rifle'] > 0, 0., inv['rifle'], this.map.player.weapon == 'rifle')) {
+    if (mkBtn(0, 'rifle-icon', this.map.player.fireballT <= 0 && inv['rifle'] > 0, (this.map.player.weaponCooldown / this.map.player.weaponCooldownMax) * (this.map.player.weapon !== 'rifle' ? 0 : 1), inv['rifle'], this.map.player.weapon == 'rifle')) {
         this.map.player.weapon = 'rifle';   
     }
 
-    this.uiCtx.font = 'normal normal normal 14px/normal Courier New';
+    this.uiCtx.font = '14px Courier New';
     this.uiCtx.textAlign = 'right';
     this.uiCtx.fillStyle = '#fff';
     this.uiCtx.fillText(`${Math.round(1/dt)} fps`, GAME_WIDTH - 10, 15);
     //this.uiCtx.fillText(`${Math.round(this.worldRender.mouseAngle/Math.PI*180)} - ${Math.round(this.map.player.angle*90)}`, GAME_WIDTH - 10, 15);
 
-    this.uiCtx.drawImage(IMG[this.worldRender.targetEnemey ? 'cursor-crossair' : 'cursor-normal'], GAME_MOUSE.x - 16, GAME_MOUSE.y - 16);
+    this.uiCtx.drawImage(IMG[(this.worldRender.targetEnemey && !hover) ? 'cursor-crossair' : 'cursor-normal'], GAME_MOUSE.x - 16, GAME_MOUSE.y - 16);
+
+    this.worldRender.render(dt, time);
 
     this.uiTexture.needsUpdate = true;
 

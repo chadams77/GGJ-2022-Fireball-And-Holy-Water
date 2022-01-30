@@ -41,6 +41,17 @@ window.Enemy = function(eset, map, player, x, y, type) {
 
 };
 
+Enemy.prototype.damage = function(dmg) {
+    let dx = this.player.x - this.x, dy = this.player.y - this.y;
+    let len = Math.sqrt(dx*dx+dy*dy);
+    SFX['damage'].play(4 / len, 0.4+Math.random()*0.1);
+    this.hp -= dmg;
+    if (this.hp <= 0) {
+        this.hp = 0;
+        SFX[`demon-die-${Math.floor(1 + Math.random()*4)}`].play(1.75 / len, 0.95+Math.random()*0.1);
+    }
+};
+
 Enemy.prototype.updateRender = function(dt, time) {
 
     if (this.hp > 0) {
