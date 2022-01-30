@@ -15,8 +15,33 @@ window.Player = function(x,y,angle,map,eset) {
         [ -1, 0],
         [ 0, -1]
     ];
-    this.inventory = { 'pistol': 0, 'holywater': 0, 'fireball': 0, 'shotgun': 0, 'rifle': 0 };
+    this.inventory = { 'pistol': 10, 'holywater': 5, 'fireball': 5, 'shotgun': 6, 'rifle': 5 };
     this.eset = eset;
+    this.hp = 3;
+    this.maxHP = 3;
+    this.weapon = 'rock';
+    this.fireballT = 0.;
+};
+
+Player.prototype.heal = function(amt) {
+    if (this.dead) {
+        return;
+    }
+    this.hp += (amt || 2.5);
+    if (this.hp > this.maxHP) {
+        this.hp = this.maxHP;
+    }
+};
+
+Player.prototype.damage = function(amt) {
+    if (this.dead) {
+        return;
+    }
+    this.hp -= (amt || 0);
+    if (this.hp < 0) {
+        this.hp = 0;
+        this.dead = true;
+    }
 };
 
 Player.prototype.moveForward = function() {
@@ -60,6 +85,13 @@ Player.prototype.turnRight = function() {
 };
 
 Player.prototype.update = function(dt, time) {
+    if (this.fireballT > 0.) {
+        this.damage(dt * (this.maxHP * 0.5) / 10.);
+    }
+    this.fireballT -= dt;
+    if (this.fireballT < 0.) {
+        this.fireballT = 0.;
+    }
     if (this.moving) {
         this.moveT += dt * 4.;
         this.x = this.sx + (this.toX-this.sx) * Math.sin(this.moveT*Math.PI*0.5,0.5);
@@ -73,7 +105,7 @@ Player.prototype.update = function(dt, time) {
             this.moveT = 0.;
         }
     }
-    else {
+    else if (!this.dead) {
         let item = this.map.itemSet.doesCollide(this.x, this.y);
         if (item && item.take()) {
             let cnt = 1;
@@ -88,7 +120,7 @@ Player.prototype.update = function(dt, time) {
                     cnt = 3;
                     break;
                 case 'fireball':
-                    cnt = 2;
+                    cnt = 1;
                     break;
                 case 'holywater':
                     cnt = 1;

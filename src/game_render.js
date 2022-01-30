@@ -126,8 +126,8 @@ GameRender.prototype.render = function(dt, time) {
 
     this.uiCtx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
 
-    let totalHp = 5;
-    let haveHP = 5;
+    let totalHp = this.map.player.maxHP;
+    let haveHP = this.map.player.hp;
     let hSize = 20;
 
     for (let i=1; i<=totalHp; i++) {
@@ -142,7 +142,7 @@ GameRender.prototype.render = function(dt, time) {
         let y = GAME_HEIGHT - 32 - 8;
         this.uiCtx.drawImage(IMG['button-disabled'], x, y);
         cooldown = cooldown || 0.;
-        if (enabled && cooldown <= 0.) {
+        if (enabled && cooldown >= 0.) {
             this.uiCtx.drawImage(IMG[sel ? 'button-sel' : 'button'], 0, 0, Math.round(32*(1-cooldown)), 32, x, y, Math.round(32*(1-cooldown)), 32);
         }
         if (enabled && icon) {
@@ -160,15 +160,38 @@ GameRender.prototype.render = function(dt, time) {
             this.uiCtx.fillText(`${count}`, x + 25, y + 34.5);
             this.uiCtx.lineWidth = 1.;
         }
+        if (enabled && MOUSE_CLICK && GAME_MOUSE.x >= x && GAME_MOUSE.y >= y && GAME_MOUSE.x < (x+32) && GAME_MOUSE.y < (y+32)) {
+            MOUSE_CLICK = false;
+            SFX['get-ammo'].play(0.25, 1.5);
+            return true;
+        }
+        return false;
     };
 
     let inv = this.map.player.inventory || {};
-    mkBtn(6, 'fireball-icon', inv['fireball'] > 0, 0., inv['fireball']);
-    mkBtn(5, 'holywater-icon', inv['holywater'] > 0, 0., inv['holywater']);
-    mkBtn(3, 'rock-icon', true, 0., 0, true);
-    mkBtn(2, 'pistol-icon', inv['pistol'] > 0, 0., inv['pistol']);
-    mkBtn(1, 'shotgun-icon', inv['shotgun'] > 0, 0., inv['shotgun']);
-    mkBtn(0, 'rifle-icon', inv['rifle'] > 0, 0., inv['rifle']);
+    if (mkBtn(6, 'fireball-icon', inv['fireball'] > 0, this.map.player.fireballT / 10., inv['fireball'], this.map.player.fireballT > 0.) && this.map.player.fireballT <= 0.) {
+        inv['fireball'] -= 1;
+        this.map.player.fireballT = 10.;
+        SFX['drink-2'].play(0.5, 0.9);
+    }
+    if (mkBtn(5, 'holywater-icon', inv['holywater'] > 0, 0., inv['holywater'])) {
+        inv['holywater'] -= 1;
+        this.map.player.fireballT = 0.;
+        this.map.player.heal();
+        SFX['drink-1'].play(0.5, 1.);
+    }
+    if (mkBtn(3, 'rock-icon', this.map.player.fireballT <= 0, 0., 0, this.map.player.weapon == 'rock')) {
+        this.map.player.weapon = 'rock';
+    }
+    if (mkBtn(2, 'pistol-icon', this.map.player.fireballT <= 0 && inv['pistol'] > 0, 0., inv['pistol'], this.map.player.weapon == 'pistol')) {
+        this.map.player.weapon = 'pistol';
+    }
+    if (mkBtn(1, 'shotgun-icon', this.map.player.fireballT <= 0 &&inv['shotgun'] > 0, 0., inv['shotgun'], this.map.player.weapon == 'shotgun')) {
+        this.map.player.weapon = 'shotgun';
+    }
+    if (mkBtn(0, 'rifle-icon', this.map.player.fireballT <= 0 &&inv['rifle'] > 0, 0., inv['rifle'], this.map.player.weapon == 'rifle')) {
+        this.map.player.weapon = 'rifle';   
+    }
 
     this.uiCtx.font = 'normal normal normal 14px/normal Courier New';
     this.uiCtx.textAlign = 'right';

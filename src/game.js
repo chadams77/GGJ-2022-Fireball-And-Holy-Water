@@ -17,6 +17,7 @@ window.FHW = function (canvasId) {
 
     window.KEY_PRESSED = {};
     window.KEY_DOWN = {};
+    window.MOUSE_CLICK = false;
     document.addEventListener('keyup', (e) => {
         e = e || window.event;
         KEY_PRESSED[e.keyCode] = true;
@@ -27,6 +28,10 @@ window.FHW = function (canvasId) {
         KEY_DOWN[e.keyCode] = true;
     });
     this.soundLoadClicked = false;
+    document.addEventListener('mouseup', (e) => {
+        e = e || window.event;
+        MOUSE_CLICK = true;
+    });
     document.addEventListener('mousedown', (e) => {
         if (this.soundLoadClicked) {
             return;
@@ -37,12 +42,16 @@ window.FHW = function (canvasId) {
             "sfx/music-hell.wav",
             "sfx/get-ammo.wav",
             "sfx/walk-1.wav",
-            "sfx/walk-2.wav"
+            "sfx/walk-2.wav",
+            "sfx/drink-1.wav",
+            "sfx/drink-2.wav"
         ]);
         sounds.whenLoaded = () => {
             SFX['get-ammo'] = new SoundEffect("sfx/get-ammo.wav");
             SFX['walk-1'] = new SoundEffect("sfx/walk-1.wav");
             SFX['walk-2'] = new SoundEffect("sfx/walk-2.wav");
+            SFX['drink-1'] = new SoundEffect("sfx/drink-1.wav");
+            SFX['drink-2'] = new SoundEffect("sfx/drink-2.wav");
             this.soundsLoaded = true;
             document.body.removeChild(document.getElementById('load-button'));
             document.getElementById('c3d').style.display = 'block';
@@ -85,6 +94,7 @@ FHW.prototype.updateRender = function(dt, time) {
 
     this.gameRender.render(dt, time);
     window.KEY_PRESSED = {};
+    window.MOUSE_CLICK = false;
 
 };
 

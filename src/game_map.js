@@ -424,10 +424,8 @@ GameMap.prototype.updateRender = function(dt, time) {
     this.smaterial.uniforms.hellT.value = this.hellT;
     this.lightSystem.setFogColor(new THREE.Vector3(this.hellT * 0.6 + (1 - this.hellT) * 0.5, (1 - this.hellT) * 0.5, (1 - this.hellT) * 0.5));
 
-    if (KEY_PRESSED[72]) {
-        this.changeTheme(this.hellT > 0.5 ? 0 : 1);
-    }
-
+    this.changeTheme(this.player.fireballT > 0 ? 1 : 0);
+  
     this.enemySet.player = this.player;
     this.enemySet.updateRender(dt, time);
     this.itemSet.player = this.player;
