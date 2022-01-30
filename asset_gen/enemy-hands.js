@@ -16,9 +16,13 @@ const genHands = async(type) => {
             vec3 hand1p = vec3(-25., 8., -30.);
             vec3 hand2p = vec3(25., -8., -20.);
             ` : ``}
+            ${type === 'rdemon' ? `
+            vec3 hand1p = vec3(-28., 8., -30.);
+            vec3 hand2p = vec3(28., -8., -20.);
+            ` : ``}
 
             float handsDist ( vec3 p ) {
-                ${type === 'ydemon' ? `
+                ${type === 'ydemon' || type === 'rdemon' ? `
                 float ret = min(length(p - hand1p) - 10., length(p - hand2p) - 10.);
                 `: `
                 float ret = min(length(p - hand1p) - 5., length(p - hand2p) - 5.);
@@ -65,6 +69,9 @@ const genHands = async(type) => {
             ${type === 'ydemon' ? `
             ret.rgb = vec3(0.6, 0.6, 0.);
             `:``}
+            ${type === 'rdemon' ? `
+            ret.rgb = vec3(0.6, 0.05, 0.01);
+            `:``}
         `
     });
     await vgen.GenerateVoxels(`${type}-hands-attack`, {
@@ -82,9 +89,13 @@ const genHands = async(type) => {
             vec3 hand1p = vec3(-15., 5., -50.);
             vec3 hand2p = vec3(21., -5., -10.);
             ` : ``}
+            ${type === 'rdemon' ? `
+            vec3 hand1p = vec3(-17., 5., -50.);
+            vec3 hand2p = vec3(23., -5., -10.);
+            ` : ``}
 
             float handsDist ( vec3 p ) {
-                ${type === 'ydemon' ? `
+                ${type === 'ydemon' || type === 'rdemon' ? `
                 float ret = min(length(p - hand1p) - 10., length(p - hand2p) - 10.);
                 `: `
                 float ret = min(length(p - hand1p) - 5., length(p - hand2p) - 5.);
@@ -130,14 +141,18 @@ const genHands = async(type) => {
             ${type === 'ydemon' ? `
             ret.rgb = vec3(1., 1., 0.5);
             `:``}
+            ${type === 'rdemon' ? `
+            ret.rgb = vec3(1., 0.85, 0.75);
+            `:``}
             `
     });
 }
 
 const main = async () => {
-    await genHands('skull');
+    /*await genHands('skull');
     await genHands('gdemon');
-    await genHands('ydemon');
+    await genHands('ydemon');*/
+    await genHands('rdemon');
 };
 
 main();

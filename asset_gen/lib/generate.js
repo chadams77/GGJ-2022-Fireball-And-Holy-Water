@@ -241,7 +241,12 @@ exports.GenerateVoxels = async (outFile, args) => {
                 norm.addVectors(norm, cb);
             }
         }
-        norm.normalize();
+        if (!norm.length()) {
+            norm.set(0, 0, -1);
+        }
+        else {
+            norm.normalize();
+        }
         V.push(Math.floor((norm.x + 1.)*0.5*255.99));
         V.push(Math.floor((norm.y + 1.)*0.5*255.99));
         V.push(Math.floor((norm.z + 1.)*0.5*255.99));

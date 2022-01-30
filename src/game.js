@@ -32,6 +32,9 @@ window.FHW = function (canvasId) {
             this.map.player.hp = this.map.player.maxHP = 5;
         });
     }, this.lightSystem);
+    /*this.map = new GameMap(32, 2, () => {
+        // win game
+    }, this.lightSystem);*/
     this.gameRender = new GameRender(canvasId, this.map);
 
     if (this.gameRender.webGLError) {
@@ -168,6 +171,10 @@ FHW.prototype.load = async function(then) {
         { key: 'ydemon-chest', size: 64., maxDraw: 32, scale: 34. },
         { key: 'ydemon-hands', size: 128., maxDraw: 32, scale: 48.*(128/92) },
         { key: 'ydemon-hands-attack', size: 164., maxDraw: 32, scale: 48.*(164/92) },
+        { key: 'rdemon-head', size: 92., maxDraw: 32, scale: 28.*(92./48.) },
+        { key: 'rdemon-chest', size: 64., maxDraw: 32, scale: 38. },
+        { key: 'rdemon-hands', size: 128., maxDraw: 32, scale: 64.*(128/92) },
+        { key: 'rdemon-hands-attack', size: 164., maxDraw: 32, scale: 64.*(164/92) },
         { key: 'fireball-yellow', size: 64., maxDraw: 128, scale: 16., emissive: true },
         { key: 'fireball-red', size: 64., maxDraw: 128, scale: 32., emissive: true },
         { key: 'rock', size: 32., maxDraw: 128, scale: 8. },

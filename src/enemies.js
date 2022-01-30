@@ -215,6 +215,9 @@ Enemy.prototype.updateRender = function(dt, time) {
     VSPR[`${this.type}-head`].addSprite((this.x+Math.cos(ang)*0.25*attackT) * scale, (this.y+Math.sin(ang)*0.25*attackT) * scale, (0.9-0.15+0.2+float) * scale, ang, deathT);
     VSPR[`${this.type}-chest`].addSprite((this.x+Math.cos(ang)*0.25*attackT) * scale, (this.y+Math.sin(ang)*0.25*attackT) * scale, (0.5-0.15+0.2+float) * scale, ang, deathT);
     VSPR[`${this.type}-hands${attackT > 0.1 ? '-attack' : ''}`].addSprite((this.x+Math.cos(ang)*0.25*attackT) * scale, (this.y+Math.sin(ang)*0.25*attackT) * scale, (0.65-0.15+0.2+float) * scale, ang, deathT);
+    if (this.type === 'rdemon') {
+        this.map.lightSystem.addDynamic(new THREE.Vector3(0.75, 0.0, 0.0), new THREE.Vector3(this.x * scale, this.y * scale, (0.5-0.15+0.2+float) * scale), this.map.scale * 1.5);
+    }
 
     return true;
 
@@ -297,6 +300,10 @@ EnemySet.prototype.updateRender = function(dt, time) {
     VSPR['ydemon-hands-attack'].clear();
     VSPR['ydemon-head'].clear();
     VSPR['ydemon-chest'].clear();
+    VSPR['rdemon-hands'].clear();
+    VSPR['rdemon-hands-attack'].clear();
+    VSPR['rdemon-head'].clear();
+    VSPR['rdemon-chest'].clear();
 
     for (let i=0; i<this.list.length; i++) {
         const E = this.list[i];

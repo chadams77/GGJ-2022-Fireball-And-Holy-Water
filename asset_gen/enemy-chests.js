@@ -2,7 +2,7 @@ const vgen = require('./lib/generate');
 
 const genChest = async(type) => {
     await vgen.GenerateVoxels(`${type}-chest`, {
-        size: 64,
+        size: type === 'rdemon' ? 64 : 64,
         customFns: `
             float ribs(vec3 c, float radius, vec3 p) {
                 p -= c - vec3(0., 0., radius);
@@ -23,6 +23,7 @@ const genChest = async(type) => {
             p.x *= 1.5;
             ${type === 'gdemon' ? `p.x /= 1.25; p.z *= 1.25;` : ``}
             ${type === 'ydemon' ? `p.x /= 1.35; p.z *= 1.35;` : ``}
+            ${type === 'rdemon' ? `p.x /= 1.5; p.z *= 1.5;` : ``}
             ret = ribs(vec3(0., -18., 20.), 17., p);
             ret = min(ret, ribs(vec3(0., -12., 20.), 22., p));
             ret = min(ret, ribs(vec3(0., -6., 20.), 18., p));
@@ -35,7 +36,10 @@ const genChest = async(type) => {
             ${type === 'ydemon' ? `
             ret -= 3. + (snoise(p/2.7671) * 0.5 + 0.5) * 1.5;
             ` : ``}
-        `,
+            ${type === 'rdemon' ? `
+            ret -= 4. + (snoise(p/1.9671) * 0.5 + 0.5) * 2.5;
+            ` : ``}
+            `,
         colorFn: `
             //p.y = -p.y;
             p.z += 32.;
@@ -50,6 +54,7 @@ const genChest = async(type) => {
             p.x *= 1.5;
             ${type === 'gdemon' ? `p.x /= 1.25; p.z *= 1.25;` : ``}
             ${type === 'ydemon' ? `p.x /= 1.35; p.z *= 1.35;` : ``}
+            ${type === 'rdemon' ? `p.x /= 1.5; p.z *= 1.5;` : ``}
             ret.rgb = vec3(0.8, 0.8, 0.8);
             ${type === 'gdemon' ? `
             ret.rgb = mix(vec3(0.1, 0.4, 0.1), vec3(0.05, 0.2, 0.05), (snoise(p/3.7671) * 0.5 + 0.5));
@@ -57,14 +62,18 @@ const genChest = async(type) => {
             ${type === 'ydemon' ? `
             ret.rgb = mix(vec3(0.6, 0.6, 0.2), vec3(0.3, 0.3, 0.1), (snoise(p/2.7671) * 0.5 + 0.5));
             ` : ``}
+            ${type === 'rdemon' ? `
+            ret.rgb = mix(vec3(0.75, 0.1, 0.05), vec3(0.3, 0.05, 0.01), (snoise(p/2.7671) * 0.5 + 0.5));
+            ` : ``}
         `
     });
 }
 
 const main = async () => {
-    await genChest('skull');
+    /*await genChest('skull');
     await genChest('gdemon');
-    await genChest('ydemon');
+    await genChest('ydemon');*/
+    await genChest('rdemon');
 };
 
 main();

@@ -41,22 +41,22 @@ window.GameMap = function(size, level, onNextLevel, lightSystem) {
         this.level = 2;
         this.startX = 15;
         this.startY = 15;
-        this.map[this.exitX][this.exitY] = 6;
-        this.enemySet = new EnemySet(this, {'skull': 0.25, 'gdemon': 0.5, 'ydemon': 0.5, 'rdemon': 0.5}, {'skull': 3, 'gdemon': 3, 'ydemon': 2, 'rdemon': 1});
+        this.enemySet = new EnemySet(this, {'skull': 0.25, 'gdemon': 0.5, 'ydemon': 0.5, 'rdemon': 0.9}, {'skull': 3, 'gdemon': 3, 'ydemon': 2, 'rdemon': 1});
         this.itemSet = new ItemSet(this, {'pistol': 0.35, 'shotgun': 0.25, 'rifle': 0.25, 'holywater': 0.3, 'fireball': 0.15}, {'pistol': 4, 'holywater': 3, 'fireball': 2, 'shotgun': 3, 'rifle': 2});
     }
 
-    for (let xo=-2; xo<=2; xo++) {
-        for (let yo=-2; yo<=2; yo++) {
-            let x = this.exitX + xo;
-            let y = this.exitY + yo;
-            if (x > 0 && y > 0 && x < (this.size-1) && y < (this.size-1)) {
-                this.map[x][y] = !this.level ? 0 : 8;
+    if (level !== 2) {
+        for (let xo=-2; xo<=2; xo++) {
+            for (let yo=-2; yo<=2; yo++) {
+                let x = this.exitX + xo;
+                let y = this.exitY + yo;
+                if (x > 0 && y > 0 && x < (this.size-1) && y < (this.size-1)) {
+                    this.map[x][y] = !this.level ? 0 : 8;
+                }
             }
         }
+        this.map[this.exitX][this.exitY] = 6;
     }
-
-    this.map[this.exitX][this.exitY] = 6;
 
     this.canPass = {
         0: true,

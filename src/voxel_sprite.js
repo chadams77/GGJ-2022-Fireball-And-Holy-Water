@@ -68,8 +68,8 @@ VoxelSprite.prototype.initMesh = function(json) {
         this.normals[off3 + 2] = ((V[7] / 255.) - 0.5) * 2.;
     }
 
-    const pontSize = (2. / this.size) * this.scale;
-
+    const pointSize = (2. / this.size) * this.scale;
+    
     let vertShader = (shadow) => `
         precision highp float;
             
@@ -121,7 +121,7 @@ VoxelSprite.prototype.initMesh = function(json) {
             vWorldPos = pos2;
             vColor = mix(color, vec3(1., 0., 0.), inst2.x);
             vec4 mvp = modelViewMatrix * vec4(pos2, 1.0);
-            gl_PointSize = ${GLSL_INSERT.FLOAT(pontSize)} * (${GLSL_INSERT.FLOAT(GAME_WIDTH*2.)} / -mvp.z);
+            gl_PointSize = ${GLSL_INSERT.FLOAT(pointSize)} * (${GLSL_INSERT.FLOAT(GAME_WIDTH*2.)} / -mvp.z);
             gl_Position = projectionMatrix * mvp;
         }
     `;

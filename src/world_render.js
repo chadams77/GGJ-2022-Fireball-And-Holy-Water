@@ -40,7 +40,9 @@ WorldRender.prototype.render = function(dt, time) {
     this.camera.updateMatrixWorld(true);
 
     this.map.lightSystem.addDynamic(new THREE.Vector3(0.7, 0.7, 0.7), new THREE.Vector3(this.map.player.x * this.map.scale, this.map.player.y * this.map.scale, camZ), this.map.scale * (this.map.level ? 4 : 2.5));
-    this.map.lightSystem.addDynamic(new THREE.Vector3(1.5, 0.0, 0.0), new THREE.Vector3(this.map.exitX * this.map.scale, this.map.exitY * this.map.scale, 0.), this.map.scale * 1.5);
+    if (this.map.exitX) {
+        this.map.lightSystem.addDynamic(new THREE.Vector3(1.5, 0.0, 0.0), new THREE.Vector3(this.map.exitX * this.map.scale, this.map.exitY * this.map.scale, 0.), this.map.scale * 1.5);
+    }
     this.map.lightSystem.updateShadows(dt, time, Math.cos(this.map.player.angle * Math.PI * 0.5 + lookAng), Math.sin(this.map.player.angle * Math.PI * 0.5 + lookAng));
 
     let vpPos = new THREE.Vector2(
