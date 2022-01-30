@@ -12,7 +12,7 @@ window.Enemy = function(eset, map, player, x, y, type) {
         'skull': 5,
         'gdemon': 10,
         'ydemon': 20,
-        'rdemon': 35,
+        'rdemon': 80,
         'boss': 125
     }[type];
     this.deathT = 1.;
@@ -51,6 +51,61 @@ Enemy.prototype.damage = function(dmg) {
         SFX[`demon-die-${Math.floor(1 + Math.random()*4)}`].play(1.75 / len, 0.95+Math.random()*0.1);
     }
 };
+
+Enemy.prototype.doAttack = function(farT, target) {
+    let type = this.type;
+    if (type === 'ydemon' || type === 'rdemon') {
+        SFX['fireball'].play(0.75);
+    }
+
+    let nearAcc = 0, farAcc = 0;
+    let nearDmg = 0, farDmg = 0;
+    let nearRDmg = 0, farRDmg = 0;
+    switch (type) {
+        case 'skull':
+            nearAcc = 0.95; farAcc = 0.8;
+            nearDmg = 2; farDmg = 1;
+            nearRDmg = 1; farRDmg = 2;
+            break;
+        case 'gdemon':
+            nearAcc = 0.85; farAcc = 0.75;
+            nearDmg = 3; farDmg = 2;
+            nearRDmg = 2; farRDmg = 1;
+            break;
+        case 'ydemon':
+            nearAcc = 1.; farAcc = 0.5;
+            nearDmg = 4; farDmg = 4;
+            nearRDmg = 2; farRDmg = 2;
+            break;
+        case 'rdemon':
+            nearAcc = 1.; farAcc = 0.5;
+            nearDmg = 8; farDmg = 7;
+            nearRDmg = 3; farRDmg = 3;
+            break;
+        default:
+            break;
+    }
+    let acc = farT * farAcc + (1 - farT) * nearAcc;
+    let baseDmg = farT * farDmg + (1 - farT) * nearDmg;
+    let randDmg = (farT * farRDmg + (1 - farT) * nearRDmg) * Math.random();
+    let dmg = Math.random() < acc ? (baseDmg + randDmg) : 0;
+
+    dmg /= 8.;
+
+    let onFinish = () => {
+        if (dmg) {
+            target.damage(dmg);
+            SFX['damage'].play(1, 0.95);
+        }
+    };
+
+    if (type === 'ydemon' || type === 'rdemon') {
+        this.map.proj.fire(type === 'ydemon' ? 'fireball-yellow' : 'fireball-red', this, target, dmg <= 0, onFinish);
+    }
+    else {
+        onFinish();
+    }
+}
 
 Enemy.prototype.updateRender = function(dt, time) {
 
@@ -126,10 +181,10 @@ Enemy.prototype.updateRender = function(dt, time) {
     let attackT = this.attacking ? (Math.max(0., Math.pow(Math.sin((this.turnT/this.turnLength)*2*Math.PI)*0.5+0.5, 2.) - .9) / 0.1) : 0.;
 
     if (this.attacking && !this.doneAttack && (this.turnT/this.turnLength) > 0.1) {
-        // Calculate hit/miss & damage to player
         let sdx = this.player.x - this.x, sdy = this.player.y - this.y;
         let len = Math.sqrt(sdx*sdx+sdy*sdy);
         SFX['walk-2'].play(1.5 / len, 0.9);
+        this.doAttack(Math.max(0, Math.min(len/this.attackRange, 1)), this.player);
         this.doneAttack = true;
     }
 
