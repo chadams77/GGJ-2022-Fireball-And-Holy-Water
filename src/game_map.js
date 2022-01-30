@@ -15,6 +15,12 @@ window.GameMap = function(size) {
         0: true,
         2: true
     };
+    this.canShootThrough = {
+        0: true,
+        2: true,
+        5: true,
+        4: true
+    };
 
     this.lightSystem = new LightSystem();
     this.enemySet = new EnemySet(this, {'skull': 0.75, 'gdemon': 0.25}, {'skull': 2, 'gdemon': 1});
@@ -430,6 +436,25 @@ GameMap.prototype.updateRender = function(dt, time) {
     this.enemySet.updateRender(dt, time);
     this.itemSet.player = this.player;
     this.itemSet.updateRender(dt, time);
+
+};
+
+GameMap.prototype.rayCast = function(x, y, angle, maxDist) {
+
+    let dx = Math.cos(angle), dy = Math.sin(angle);
+    for (let k=0; k<(10*maxDist); k++)   {
+        let len = k/10;
+        let x2 = x + dx * len, y2 = y + dy * len;
+        let enemy = null;
+        let mapType = (this.map && this.map[Math.floor(x)] && (typeof this.map[Math.floor(x)][Math.floor(y)] === 'number')) ? this.map[Math.floor(x)][Math.floor(y)] : -1;
+        if (mapType === -1 || !this.canShootThrough[mapType]) {
+            return { dist: len, x: Math.floor(x2), y: Math.floor(y2), map: true };
+        }
+        else if (enemy = this.enemySet.doesCollide(x2, y2)) {
+            return { dist: len, x: x2, y: y2, enemy };
+        }
+    }
+    return { dist: maxDist };
 
 };
 

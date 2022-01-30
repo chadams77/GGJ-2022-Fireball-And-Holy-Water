@@ -197,8 +197,9 @@ GameRender.prototype.render = function(dt, time) {
     this.uiCtx.textAlign = 'right';
     this.uiCtx.fillStyle = '#fff';
     this.uiCtx.fillText(`${Math.round(1/dt)} fps`, GAME_WIDTH - 10, 15);
+    //this.uiCtx.fillText(`${Math.round(this.worldRender.mouseAngle/Math.PI*180)} - ${Math.round(this.map.player.angle*90)}`, GAME_WIDTH - 10, 15);
 
-    this.uiCtx.drawImage(IMG['cursor-normal'], GAME_MOUSE.x - 16, GAME_MOUSE.y - 16);
+    this.uiCtx.drawImage(IMG[this.worldRender.targetEnemey ? 'cursor-crossair' : 'cursor-normal'], GAME_MOUSE.x - 16, GAME_MOUSE.y - 16);
 
     this.uiTexture.needsUpdate = true;
 
