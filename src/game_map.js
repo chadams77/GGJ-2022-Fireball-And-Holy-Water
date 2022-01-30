@@ -173,7 +173,6 @@ GameMap.prototype.makeMaze = function(x1, y1, x2, y2, startX, startY, endX, endY
 
     let mark = (x, y) => {
         U[x+','+y] = 1;
-        let history = [[x, y]];
         for (let k=0; k<dirC.length; k++) {
             let j = Math.floor(Math.random()*dirC.length);
             let t = dirC[k];
@@ -191,7 +190,36 @@ GameMap.prototype.makeMaze = function(x1, y1, x2, y2, startX, startY, endX, endY
         }
     }
 
+    let mark2 = (x, y) => {
+        if (U[x+','+y] === 1) {
+            return true;
+        }
+        U[x+','+y] = 2;
+        for (let k=0; k<dirC.length; k++) {
+            let j = Math.floor(Math.random()*dirC.length);
+            let t = dirC[k];
+            dirC[k] = dirC[j];
+            dirC[j] = t;
+        }
+        for (let i=0; i<dirC.length; i++) {
+            let dir = dirC[i];
+            let xa = x + dir[0], ya = y + dir[1];
+            let xb = x + dir[0]/2, yb = y + dir[1]/2;
+            if (!U[xa+','+ya] && !U[xb+','+yb] && xa >= x1 && xa <= x2 && ya >= y1 && ya <= y2) {
+                if (U[xb+','+yb] === 1) {
+                    return true;
+                }
+                U[xb+','+yb] = 2;
+                if (mark2(xa, ya)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     mark(startX, startY);
+    mark2(endX, endY);
 
     for (let key in U) {
         let tok = key.split(',');
