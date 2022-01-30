@@ -39,6 +39,9 @@ Player.prototype.heal = function(amt) {
 };
 
 Player.prototype.damage = function(amt) {
+    if (this.map.fodCallback || this.map.victory) {
+        return;
+    }
     if (this.dead) {
         return;
     }
@@ -93,6 +96,9 @@ Player.prototype.turnRight = function() {
 };
 
 Player.prototype.update = function(dt, time) {
+    if (this.map.victory) {
+        return;
+    }
     if (this.fireballT > 0.) {
         this.damage(dt * (this.maxHP * 0.5) / 10.);
     }

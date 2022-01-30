@@ -23,7 +23,7 @@ window.GameMap = function(size, level, onNextLevel, lightSystem) {
         //this.exitX = this.startX;
         //this.exitY = this.startY-3;
         this.enemySet = new EnemySet(this, {'skull': 0.75, 'gdemon': 0.125}, {'skull': 3, 'gdemon': 1});
-        this.itemSet = new ItemSet(this, {'pistol': 0.125, 'holywater': 0.125, 'fireball': 0.05}, {'pistol': 2, 'holywater': 2, 'fireball': 1});
+        this.itemSet = new ItemSet(this, {'pistol': 0.15, 'holywater': 0.125, 'fireball': 0.05, 'shotgun': 0.1 }, {'pistol': 2, 'shotgun': 1, 'holywater': 2, 'fireball': 1});
     }
     else if (level === 1) {
         this.level = 1;
@@ -35,12 +35,13 @@ window.GameMap = function(size, level, onNextLevel, lightSystem) {
         this.makeMaze(32, 1, 62, 32,  32, 16,  48, 32);
         this.makeMaze(1, 32, 32, 62,  32, 48,  32, 48);
         this.enemySet = new EnemySet(this, {'skull': 0.25, 'gdemon': 0.5, 'ydemon': 0.25}, {'skull': 3, 'gdemon': 3, 'ydemon': 2});
-        this.itemSet = new ItemSet(this, {'pistol': 0.25, 'shotgun': 0.125, 'rifle': 0.125, 'holywater': 0.2, 'fireball': 0.1}, {'pistol': 3, 'holywater': 2, 'fireball': 1, 'shotgun': 2, 'rifle': 1});
+        this.itemSet = new ItemSet(this, {'pistol': 0.25, 'shotgun': 0.175, 'rifle': 0.125, 'holywater': 0.2, 'fireball': 0.1}, {'pistol': 3, 'holywater': 2, 'fireball': 1, 'shotgun': 2, 'rifle': 1});
     }
     else if (level === 2) {
         this.level = 2;
         this.startX = 15;
         this.startY = 15;
+        this.makeOpenArea(1, 1, 31, 31);
         this.enemySet = new EnemySet(this, {'skull': 0.25, 'gdemon': 0.5, 'ydemon': 0.5, 'rdemon': 0.9}, {'skull': 3, 'gdemon': 3, 'ydemon': 2, 'rdemon': 1});
         this.itemSet = new ItemSet(this, {'pistol': 0.35, 'shotgun': 0.25, 'rifle': 0.25, 'holywater': 0.3, 'fireball': 0.15}, {'pistol': 4, 'holywater': 3, 'fireball': 2, 'shotgun': 3, 'rifle': 2});
     }
@@ -111,6 +112,9 @@ GameMap.prototype.makeOpenArea = function(x1, y1, x2, y2) {
                         this.map[x][y] = 7;
                     }
                     continue;
+                }
+                else if (this.level === 2) {
+                    this.map[x][y] = 8;
                 }
             }
             if (x%2 || y%2) {

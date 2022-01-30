@@ -12,7 +12,7 @@ window.Enemy = function(eset, map, player, x, y, type) {
         'skull': 5,
         'gdemon': 10,
         'ydemon': 20,
-        'rdemon': 80,
+        'rdemon': 1,//80,
         'boss': 125
     }[type];
     this.deathT = 1.;
@@ -128,6 +128,9 @@ Enemy.prototype.updateRender = function(dt, time) {
     else if (this.hp <= 0) {
         this.deathT += dt * 2.;
         if (this.deathT > 1.) {
+            if (this.type === 'rdemon') {
+                this.map.onNextLevel();
+            }
             return false;
         }
     }
@@ -219,6 +222,10 @@ Enemy.prototype.updateRender = function(dt, time) {
         this.map.lightSystem.addDynamic(new THREE.Vector3(0.75, 0.0, 0.0), new THREE.Vector3(this.x * scale, this.y * scale, (0.5-0.15+0.2+float) * scale), this.map.scale * 1.5);
     }
 
+    if (this.map.victory) {
+        this.damage(100);
+    }
+
     return true;
 
 };
@@ -259,7 +266,7 @@ EnemySet.prototype.doesCollide = function(x, y, ignore) {
 EnemySet.prototype.updateRender = function(dt, time) {
 
     this.spawnCheckT += dt * 2;
-    if (this.spawnCheckT >= 1.) {
+    if (this.spawnCheckT >= 1. && !this.map.victory) {
         for (let type in this.enemyProb) {
             if (this.enemyCount[type] < (this.enemyMax[type]||0)) {
                 if (Math.random() < (1/10) && Math.random() < this.enemyProb[type]) {

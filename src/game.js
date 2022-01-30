@@ -18,7 +18,8 @@ window.FHW = function (canvasId) {
                 let inventory = player.inventory;
                 this.map.fadeOutDestroy(()=>{
                     this.map = new GameMap(32, 2, () => {
-                        // win game
+                        this.map.victory = true;
+                        this.map.victoryT = 0.;
                     }, this.lightSystem);
                     this.gameRender.map = this.map;
                     this.map.load(this.gameRender.worldRender);
@@ -32,9 +33,6 @@ window.FHW = function (canvasId) {
             this.map.player.hp = this.map.player.maxHP = 5;
         });
     }, this.lightSystem);
-    /*this.map = new GameMap(32, 2, () => {
-        // win game
-    }, this.lightSystem);*/
     this.gameRender = new GameRender(canvasId, this.map);
 
     if (this.gameRender.webGLError) {

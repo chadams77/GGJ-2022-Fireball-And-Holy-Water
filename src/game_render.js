@@ -183,7 +183,7 @@ GameRender.prototype.render = function(dt, time) {
             this.uiCtx.fillText(`${count}`, x + 25, y + 34.5);
             this.uiCtx.lineWidth = 1.;
         }
-        if (GAME_MOUSE.x >= x && GAME_MOUSE.y >= y && GAME_MOUSE.x < (x+32) && GAME_MOUSE.y < (y+32)) {
+        if (GAME_MOUSE.x >= x && GAME_MOUSE.y >= y && GAME_MOUSE.x < (x+32) && GAME_MOUSE.y < (y+32) && !this.map.victory) {
             if (enabled && MOUSE_CLICK) {
                 MOUSE_CLICK = false;
                 SFX['get-ammo'].play(0.25, 1.5);
@@ -222,10 +222,10 @@ GameRender.prototype.render = function(dt, time) {
     this.uiCtx.font = '14px Courier New';
     this.uiCtx.textAlign = 'right';
     this.uiCtx.fillStyle = '#fff';
-    this.uiCtx.fillText(`${Math.round(1/dt)} fps`, GAME_WIDTH - 10, 15);
+    //this.uiCtx.fillText(`${Math.round(1/dt)} fps`, GAME_WIDTH - 10, 15);
     //this.uiCtx.fillText(`${Math.round(this.worldRender.mouseAngle/Math.PI*180)} - ${Math.round(this.map.player.angle*90)}`, GAME_WIDTH - 10, 15);
 
-    this.uiCtx.drawImage(IMG[(this.worldRender.targetEnemey && !hover) ? 'cursor-crossair' : 'cursor-normal'], GAME_MOUSE.x - 16, GAME_MOUSE.y - 16);
+    this.uiCtx.drawImage(IMG[(this.worldRender.targetEnemey && !hover) ? 'cursor-crossair' : 'cursor-normal'], GAME_MOUSE.x - 16, GAME_MOUSE.y - 24);
 
     if (this.map.fodCallback) {
         this.uiCtx.globalAlpha = 1. - (this.map.fodT);
@@ -243,6 +243,18 @@ GameRender.prototype.render = function(dt, time) {
         if (this.map.deathAnimT >= 1.5) {
             window.location.reload();
         }
+    }
+
+    if (this.map.victory) {
+        this.uiCtx.globalAlpha = Math.min(1, this.map.victoryT);
+        this.uiCtx.fillStyle = '#FFF';
+        this.uiCtx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+        this.uiCtx.font = '32px bold Courier New';
+        this.uiCtx.textAlign = 'center';
+        this.uiCtx.fillStyle = '#000';
+        this.uiCtx.fillText(`VICTORY!`, GAME_WIDTH * 0.5, GAME_HEIGHT * 0.5 + 18);
+        this.uiCtx.globalAlpha = 1.;
+        this.map.victoryT += dt/3;
     }
 
     this.worldRender.render(dt, time);
